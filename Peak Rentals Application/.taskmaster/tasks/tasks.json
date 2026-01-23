@@ -1,0 +1,173 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Fix TypeScript Compilation Errors",
+        "description": "Fix TypeScript errors in lib/prisma.ts:13 (logging config type) and lib/stripe.ts:16 (Stripe API version mismatch) to enable successful builds.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "Two blocking TypeScript errors need resolution:\n1. lib/prisma.ts:13 - Type 'string[]' not assignable to Prisma logging config\n2. lib/stripe.ts:16 - Stripe API version '2024-06-20' may not match installed package version\n\nThese must be fixed before any other development can proceed.",
+        "testStrategy": "Run 'npm run typecheck' and verify 0 errors. Run 'npm run build' to confirm production build succeeds.",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Update Next.js to Fix Security Vulnerabilities",
+        "description": "Upgrade Next.js from 14.0.4 to 14.2.35+ to address critical security vulnerabilities including SSRF, cache poisoning, and DoS attacks.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "1"
+        ],
+        "details": "Current Next.js 14.0.4 has 13 known vulnerabilities:\n- Server-Side Request Forgery (SSRF)\n- Cache Poisoning\n- Denial of Service (DoS)\n- Authorization bypass\n- Content injection\n\nRun: npm audit fix --force\nVerify: npm audit shows 0 critical vulnerabilities",
+        "testStrategy": "Run 'npm audit' and verify no critical vulnerabilities. Run 'npm run dev' to ensure app still starts correctly.",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Implement Equipment API Routes",
+        "description": "Implement the empty /api/equipment/route.ts with GET (list all) and POST (create) endpoints, and create /api/equipment/[id]/route.ts with GET, PUT, DELETE endpoints.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "1",
+          "2"
+        ],
+        "details": "Current /api/equipment/route.ts is 0 bytes. Implement:\n\nGET /api/equipment:\n- List all equipment with optional category/location filters\n- Include owner details\n- Use lib/types.ts interfaces\n\nPOST /api/equipment:\n- Create equipment (authenticated owners only)\n- Use lib/validation.ts validateEquipment()\n- Handle image and location fields\n\nGET/PUT/DELETE /api/equipment/[id]:\n- Get single equipment with owner\n- Update equipment (owner only)\n- Delete equipment (owner only)",
+        "testStrategy": "Test with curl/Postman: GET returns equipment array, POST creates equipment, PUT updates, DELETE removes. Verify validation rejects invalid data.",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Implement Search API with Unfulfilled Logging",
+        "description": "Create /api/equipment/search/route.ts POST endpoint that searches equipment and logs unfulfilled searches to SearchLog table.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "3"
+        ],
+        "details": "POST /api/equipment/search:\n- Accept: { query: string, category?: string, location?: string }\n- Search equipment by title, description, category, location\n- Use Prisma full-text search or LIKE queries\n- Return: { results: Equipment[], count: number, fulfilled: boolean }\n\nUnfulfilled Search Logging:\n- If count === 0, log to SearchLog with fulfilled=false\n- Include query, category, userId (if authenticated)\n- This powers the admin market gap analysis",
+        "testStrategy": "Search for existing equipment (should return results, fulfilled=true). Search for non-existent equipment (should return empty, fulfilled=false, log created in SearchLog).",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Implement Bookings API Routes",
+        "description": "Implement /api/bookings/route.ts with GET (list user's bookings) and POST (create booking), plus /api/bookings/[id]/route.ts for status updates.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "3"
+        ],
+        "details": "GET /api/bookings:\n- List authenticated user's bookings\n- Include equipment details\n- Sort by date descending\n\nPOST /api/bookings:\n- Create booking with equipmentId, startDate, endDate\n- Validate dates (start < end, not in past)\n- Check equipment availability (no overlapping bookings)\n- Calculate totalPrice from dailyRate * days\n\nPATCH /api/bookings/[id]:\n- Update status (cancel, confirm)\n- Only booking owner or admin can update\n- Set cancelledAt and cancellationReason on cancel",
+        "testStrategy": "Create booking, verify it appears in GET. Try overlapping booking (should fail). Cancel booking, verify status updated.",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Implement Stripe Connect API Routes",
+        "description": "Create /api/stripe/connect/ routes for account creation, status checking, and onboarding link generation using existing stripeService.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "1",
+          "2"
+        ],
+        "details": "lib/stripe.ts already has all service methods. Create routes to expose them:\n\nPOST /api/stripe/connect/account:\n- Create connected account for authenticated owner\n- Use stripeService.createConnectedAccount(userId)\n- Return { accountId: string }\n\nGET /api/stripe/connect/account-status:\n- Check owner's account readiness\n- Use stripeService.getAccountStatus(accountId)\n- Return { readyForPayments, requirements }\n\nGET /api/stripe/connect/onboarding-link:\n- Generate Stripe onboarding URL\n- Use stripeService.createAccountLink(accountId)\n- Return { url: string }",
+        "testStrategy": "Create account (returns accountId). Check status (returns requirements). Get onboarding link (returns valid Stripe URL).",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Implement Stripe Checkout and Webhook Routes",
+        "description": "Create /api/stripe/checkout for payment sessions and /api/stripe/webhook for handling Stripe events.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "5",
+          "6"
+        ],
+        "details": "POST /api/stripe/checkout:\n- Accept: { equipmentId: string, days: number }\n- Validate equipment exists and owner has Stripe account\n- Use stripeService.createCheckoutSession()\n- Return { sessionId, url }\n\nPOST /api/stripe/webhook:\n- Verify signature with stripeService.validateWebhookSignature()\n- Handle checkout.session.completed:\n  - Find/create booking\n  - Set status to CONFIRMED\n- Handle checkout.session.expired:\n  - Set booking status to CANCELLED\n- Return { received: true }",
+        "testStrategy": "Create checkout session (returns Stripe URL). Simulate webhook with Stripe CLI: stripe trigger checkout.session.completed. Verify booking status updated.",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Implement Analytics API Routes",
+        "description": "Create /api/analytics/ routes for unfulfilled searches, market gaps, and owner stats (admin/owner only).",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "4"
+        ],
+        "details": "GET /api/analytics/unfulfilled-searches (Admin only):\n- Query SearchLog where fulfilled=false\n- Group by query, count occurrences\n- Return top 20 most searched unfulfilled queries\n\nGET /api/analytics/market-gaps (Admin only):\n- Analyze SearchLog vs Equipment\n- Find categories with high search volume but low listings\n- Return gap analysis with recommendations\n\nGET /api/analytics/owner-stats (Owner only):\n- Count owner's equipment listings\n- Count bookings for owner's equipment\n- Sum revenue from completed bookings\n- Return { totalListings, totalBookings, totalRevenue }",
+        "testStrategy": "Create unfulfilled searches, verify they appear in analytics. Check owner stats match database. Verify admin-only access control.",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Restore Owner Dashboard Pages",
+        "description": "Create/restore owner pages: dashboard, create-listing, edit-listing, onboarding, and reauth.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "3",
+          "6"
+        ],
+        "details": "These pages were deleted in git. Recreate:\n\n/owner/dashboard/page.tsx:\n- Show owner stats (equipment count, bookings, revenue)\n- List owner's equipment with edit/delete actions\n- Show Stripe account status\n\n/owner/create-listing/page.tsx:\n- Use EquipmentForm component\n- POST to /api/equipment\n\n/owner/listings/[id]/edit/page.tsx:\n- Load equipment data\n- Use EquipmentForm with existing values\n- PUT to /api/equipment/[id]\n\n/owner/onboarding/page.tsx:\n- Use OwnerOnboarding component\n- Guide through Stripe Connect setup\n\n/owner/reauth/page.tsx:\n- Handle Stripe re-authentication flow",
+        "testStrategy": "Navigate to each page, verify renders without errors. Create listing, edit listing, verify changes saved. Complete Stripe onboarding flow.",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Restore Admin Dashboard Pages",
+        "description": "Create/restore admin pages: dashboard, unfulfilled-searches, and users management.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "8"
+        ],
+        "details": "These pages were deleted in git. Recreate:\n\n/admin/dashboard/page.tsx:\n- Use AdminDashboard component\n- Show platform-wide stats\n- Quick links to admin functions\n\n/admin/unfulfilled-searches/page.tsx:\n- Use UnfulfilledSearches component\n- Display market gap analysis\n- Show trending unfulfilled queries\n\n/admin/users/page.tsx:\n- List all users with role badges\n- Filter by role (Admin, Owner, Renter)\n- View user details and activity",
+        "testStrategy": "Access as admin, verify dashboard loads. Check unfulfilled searches display correctly. Verify user list shows all users with correct roles.",
+        "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "Implement Design System and UI Polish",
+        "description": "Establish consistent design system with color palette, typography, spacing, and component styling across the application.",
+        "status": "pending",
+        "priority": "low",
+        "dependencies": [
+          "9",
+          "10"
+        ],
+        "details": "Create cohesive visual identity:\n\n1. Design Tokens:\n- Color palette (primary, secondary, accent, neutrals)\n- Typography scale (headings, body, captions)\n- Spacing system (4px grid)\n- Border radius, shadows\n\n2. Component Styling:\n- Buttons (primary, secondary, ghost, danger)\n- Cards (equipment, booking, stats)\n- Forms (inputs, selects, errors)\n- Navigation (header, sidebar, mobile)\n\n3. Responsive Design:\n- Mobile-first approach\n- Breakpoints: sm(640), md(768), lg(1024), xl(1280)\n- Touch-friendly targets (44px minimum)\n\n4. Accessibility:\n- Color contrast ratios (WCAG AA)\n- Focus states\n- Screen reader support",
+        "testStrategy": "Visual regression testing across breakpoints. Lighthouse accessibility audit. Manual review of all pages for consistency.",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "End-to-End Testing and Quality Assurance",
+        "description": "Comprehensive testing of all features including equipment CRUD, search, bookings, payments, and admin functions.",
+        "status": "pending",
+        "priority": "low",
+        "dependencies": [
+          "7",
+          "9",
+          "10",
+          "11"
+        ],
+        "details": "Test all user flows:\n\n1. Renter Flow:\n- Browse equipment\n- Search (fulfilled and unfulfilled)\n- View equipment details\n- Book equipment\n- Complete checkout\n- View booking history\n\n2. Owner Flow:\n- Complete Stripe onboarding\n- Create equipment listing\n- Edit/delete listings\n- View bookings for equipment\n- Check revenue stats\n\n3. Admin Flow:\n- View platform dashboard\n- Analyze unfulfilled searches\n- Manage users\n\n4. Error Handling:\n- Invalid inputs\n- Network failures\n- Unauthorized access",
+        "testStrategy": "Manual walkthrough of all flows. Document any bugs found. Verify all error states handled gracefully. Final build and deployment test.",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2026-01-23T11:36:12.714Z",
+      "updated": "2026-01-23T11:36:12.714Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

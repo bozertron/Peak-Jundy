@@ -1,0 +1,230 @@
+# Peak Rentals - Product Requirements Document
+
+## Project Overview
+
+Peak Rentals is an equipment rental marketplace built with Next.js 14, Prisma (SQLite), and Stripe Connect. The platform enables equipment owners to list items for rent and customers to book them with secure payment processing.
+
+## Current State
+
+The project has foundational code but critical gaps blocking functionality:
+
+### What Works
+- Prisma schema with User, Equipment, Booking, SearchLog models
+- TypeScript type definitions (lib/types.ts - 169 lines)
+- Validation library (lib/validation.ts - 148 lines)
+- Stripe service library (lib/stripe.ts - 297 lines)
+- Frontend components (Equipment, Search, Stripe, Admin, Navigation)
+- Base pages (/, /browse, /equipment/[id], auth pages, booking result pages)
+- Database file exists with seed data
+
+### What's Broken (CRITICAL)
+- API route files are EMPTY (0 bytes) - no backend functionality
+- No search endpoint exists
+- No analytics endpoints exist
+- No Stripe API routes (only service library)
+- Owner/admin pages deleted from git
+
+## Technical Requirements
+
+### Phase 1: Critical API Implementation
+
+#### Task 1.1: Fix TypeScript Errors
+- Fix lib/prisma.ts:13 - Type 'string[]' not assignable to logging config
+- Fix lib/stripe.ts:16 - Update Stripe API version to match installed package
+
+#### Task 1.2: Security Update
+- Run npm audit fix --force to update Next.js from 14.0.4 to 14.2.35+
+- Address critical security vulnerabilities (SSRF, cache poisoning, DoS)
+
+#### Task 1.3: Equipment API Routes
+Implement /api/equipment/route.ts:
+- GET: List all equipment with optional filtering
+- POST: Create equipment (authenticated owners only)
+
+Implement /api/equipment/[id]/route.ts:
+- GET: Get single equipment with owner details
+- PUT: Update equipment (owner only)
+- DELETE: Delete equipment (owner only)
+
+Requirements:
+- Use lib/validation.ts validators
+- Use lib/types.ts for type safety
+- Handle image and location fields
+- Return proper error responses
+
+#### Task 1.4: Search API
+Implement /api/equipment/search/route.ts:
+- POST endpoint accepting: { query: string, category?: string, location?: string }
+- Search equipment by title, description, category, location
+- Log unfulfilled searches (no results) to SearchLog table
+- Return: { results: Equipment[], count: number, fulfilled: boolean }
+
+#### Task 1.5: Bookings API
+Implement /api/bookings/route.ts:
+- GET: List authenticated user's bookings
+- POST: Create new booking (validates dates, equipment availability)
+
+Implement /api/bookings/[id]/route.ts:
+- GET: Get booking details
+- PATCH: Update booking status (cancel, confirm)
+
+### Phase 2: Stripe Integration
+
+#### Task 2.1: Stripe Connect Routes
+Create /api/stripe/connect/ directory with:
+
+account/route.ts:
+- POST: Create connected account for owner
+- Uses stripeService.createConnectedAccount()
+
+account-status/route.ts:
+- GET: Check if owner's account is ready for payments
+- Uses stripeService.getAccountStatus()
+
+onboarding-link/route.ts:
+- GET: Generate Stripe onboarding URL
+- Uses stripeService.createAccountLink()
+
+#### Task 2.2: Checkout Route
+Implement /api/stripe/checkout/route.ts:
+- POST: Create checkout session for equipment rental
+- Body: { equipmentId: string, days: number }
+- Uses stripeService.createCheckoutSession()
+- Validates equipment exists and owner has Stripe account
+
+#### Task 2.3: Webhook Handler
+Implement /api/stripe/webhook/route.ts:
+- POST: Handle Stripe webhook events
+- Verify signature with stripeService.validateWebhookSignature()
+- Process checkout.session.completed and checkout.session.expired
+- Update booking status accordingly
+
+### Phase 3: Analytics & Admin
+
+#### Task 3.1: Analytics API
+Implement /api/analytics/unfulfilled-searches/route.ts:
+- GET: Admin only - return top 20 unfulfilled search queries
+- Aggregate from SearchLog where fulfilled=false
+
+Implement /api/analytics/market-gaps/route.ts:
+- GET: Admin only - analyze demand vs supply gaps
+- Return categories with high search volume but low listings
+
+Implement /api/analytics/owner-stats/route.ts:
+- GET: Owner only - return owner's equipment stats
+- Total listings, total bookings, revenue
+
+#### Task 3.2: Restore Owner Pages
+Create or restore:
+- /owner/dashboard/page.tsx - Owner home with stats
+- /owner/create-listing/page.tsx - Equipment creation form
+- /owner/listings/[id]/edit/page.tsx - Edit listing
+- /owner/onboarding/page.tsx - Stripe onboarding flow
+- /owner/reauth/page.tsx - Stripe re-authentication
+
+#### Task 3.3: Restore Admin Pages
+Create or restore:
+- /admin/dashboard/page.tsx - Admin overview
+- /admin/unfulfilled-searches/page.tsx - Market gap analysis
+- /admin/users/page.tsx - User management
+
+### Phase 4: Testing & Polish
+
+#### Task 4.1: API Testing
+- Test all equipment CRUD operations
+- Test search with fulfilled and unfulfilled scenarios
+- Test booking creation and status updates
+- Test Stripe checkout flow (test mode)
+- Test webhook handling
+
+#### Task 4.2: Integration Testing
+- Browse page fetches and displays equipment
+- Equipment detail shows correct data
+- Checkout button initiates payment
+- Admin dashboard displays analytics
+- Owner dashboard shows stats
+
+#### Task 4.3: UI/UX Polish
+- Implement consistent design system
+- Mobile responsive testing
+- Loading states and error handling
+- Accessibility audit
+
+## Database Schema Reference
+
+```prisma
+enum Role { ADMIN OWNER RENTER }
+enum BookingStatus { PENDING CONFIRMED CANCELLED COMPLETED }
+
+model User {
+  id              String     @id @default(cuid())
+  email           String?    @unique
+  name            String?
+  image           String?
+  role            Role       @default(RENTER)
+  stripeAccountId String?
+  equipment       Equipment[]
+  bookings        Booking[]
+}
+
+model Equipment {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  category    String
+  dailyRate   Float
+  image       String?
+  location    String?
+  hourMeter   Float?
+  ownerId     String
+  owner       User      @relation(...)
+  bookings    Booking[]
+}
+
+model Booking {
+  id                 String        @id @default(cuid())
+  equipmentId        String
+  renterId           String
+  startDate          DateTime
+  endDate            DateTime
+  totalPrice         Float
+  status             BookingStatus @default(PENDING)
+  stripeSessionId    String?
+  cancelledAt        DateTime?
+  cancellationReason String?
+}
+
+model SearchLog {
+  id        String   @id @default(cuid())
+  query     String
+  category  String?
+  userId    String?
+  fulfilled Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+```
+
+## Success Criteria
+
+1. All API endpoints return expected responses
+2. TypeScript compilation passes with no errors
+3. ESLint passes with no warnings
+4. Equipment can be created, read, updated, deleted
+5. Search returns results and logs unfulfilled searches
+6. Stripe checkout creates sessions successfully
+7. Webhooks update booking status correctly
+8. Admin can view analytics
+9. Owner can manage listings
+10. All pages render without errors
+
+## Priority Order
+
+1. CRITICAL: Fix TypeScript errors (blocking build)
+2. CRITICAL: Security update (vulnerabilities)
+3. HIGH: Equipment API (core functionality)
+4. HIGH: Search API (user experience)
+5. HIGH: Bookings API (business logic)
+6. MEDIUM: Stripe routes (payments)
+7. MEDIUM: Analytics API (admin features)
+8. MEDIUM: Restore pages (full functionality)
+9. LOW: Testing & polish (quality assurance)

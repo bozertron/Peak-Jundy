@@ -1,0 +1,856 @@
+/**
+ * Peak Rentals Global Styles
+ * "Mountain Workshop" Design System
+ *
+ * Colors: Forest Slate primary, Burnt Orange accent, Steel blue secondary
+ * Fonts: Bebas Neue (display), DM Sans (heading), Source Sans 3 (body), JetBrains Mono (mono)
+ */
+
+/* ============================================================================
+   GOOGLE FONTS
+   ============================================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
+/* ============================================================================
+   TAILWIND DIRECTIVES
+   ============================================================================ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   CSS CUSTOM PROPERTIES (Design Tokens)
+   ============================================================================ */
+:root {
+  /* -------------------------------------------------------------------------
+     PRIMARY - Deep Forest Slate (Trust & Foundation)
+     ------------------------------------------------------------------------- */
+  --color-primary-50: #f4f6f5;
+  --color-primary-100: #e3e8e6;
+  --color-primary-200: #c9d3cf;
+  --color-primary-300: #a3b3ac;
+  --color-primary-400: #778d82;
+  --color-primary-500: #5a7268;
+  --color-primary-600: #475c53;
+  --color-primary-700: #3b4b44;
+  --color-primary-800: #323e39;
+  --color-primary-900: #2b3532;
+  --color-primary-950: #171e1b;
+
+  /* -------------------------------------------------------------------------
+     ACCENT - Burnt Orange (Action & Energy)
+     ------------------------------------------------------------------------- */
+  --color-accent-50: #fef6ee;
+  --color-accent-100: #fcebd7;
+  --color-accent-200: #f8d3ae;
+  --color-accent-300: #f3b47b;
+  --color-accent-400: #ed8b45;
+  --color-accent-500: #e86f22;
+  --color-accent-600: #d95518;
+  --color-accent-700: #b44016;
+  --color-accent-800: #903419;
+  --color-accent-900: #742d18;
+  --color-accent-950: #3e140a;
+
+  /* -------------------------------------------------------------------------
+     STEEL - Steel Blue (Equipment & Industrial)
+     ------------------------------------------------------------------------- */
+  --color-steel-50: #f5f7fa;
+  --color-steel-100: #ebeef3;
+  --color-steel-200: #d2dbe6;
+  --color-steel-300: #abbdcf;
+  --color-steel-400: #7e99b4;
+  --color-steel-500: #5e7c9b;
+  --color-steel-600: #4a6481;
+  --color-steel-700: #3d5169;
+  --color-steel-800: #364558;
+  --color-steel-900: #303b4b;
+  --color-steel-950: #202832;
+
+  /* -------------------------------------------------------------------------
+     NEUTRAL - Warm Gray (Backgrounds & Text)
+     ------------------------------------------------------------------------- */
+  --color-neutral-50: #fafaf9;
+  --color-neutral-100: #f5f4f2;
+  --color-neutral-200: #e8e6e3;
+  --color-neutral-300: #d6d3ce;
+  --color-neutral-400: #b8b3ab;
+  --color-neutral-500: #9c968c;
+  --color-neutral-600: #857e74;
+  --color-neutral-700: #6e6860;
+  --color-neutral-800: #5c5751;
+  --color-neutral-900: #4d4945;
+  --color-neutral-950: #292724;
+
+  /* -------------------------------------------------------------------------
+     SEMANTIC COLORS
+     ------------------------------------------------------------------------- */
+  --color-success-light: #d1fae5;
+  --color-success-main: #10b981;
+  --color-success-dark: #065f46;
+
+  --color-warning-light: #fef3c7;
+  --color-warning-main: #f59e0b;
+  --color-warning-dark: #92400e;
+
+  --color-error-light: #fee2e2;
+  --color-error-main: #ef4444;
+  --color-error-dark: #991b1b;
+
+  --color-info-light: #dbeafe;
+  --color-info-main: #3b82f6;
+  --color-info-dark: #1e40af;
+
+  /* -------------------------------------------------------------------------
+     SURFACE COLORS
+     ------------------------------------------------------------------------- */
+  --surface-base: #fafaf9;
+  --surface-elevated: #ffffff;
+  --surface-sunken: #f0efed;
+  --surface-overlay: rgba(23, 30, 27, 0.8);
+
+  /* -------------------------------------------------------------------------
+     TYPOGRAPHY
+     ------------------------------------------------------------------------- */
+  --font-display: 'Bebas Neue', 'Impact', sans-serif;
+  --font-heading: 'DM Sans', 'Helvetica Neue', sans-serif;
+  --font-body: 'Source Sans 3', 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+  --text-7xl: 4.5rem;
+
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-black: 900;
+
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.15em;
+
+  /* -------------------------------------------------------------------------
+     SPACING
+     ------------------------------------------------------------------------- */
+  --space-px: 1px;
+  --space-0: 0;
+  --space-0-5: 0.125rem;
+  --space-1: 0.25rem;
+  --space-1-5: 0.375rem;
+  --space-2: 0.5rem;
+  --space-2-5: 0.625rem;
+  --space-3: 0.75rem;
+  --space-3-5: 0.875rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-7: 1.75rem;
+  --space-8: 2rem;
+  --space-9: 2.25rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-14: 3.5rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* -------------------------------------------------------------------------
+     BORDERS & RADII
+     ------------------------------------------------------------------------- */
+  --radius-none: 0;
+  --radius-sm: 0.25rem;
+  --radius-default: 0.5rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+
+  --border-default: 1px;
+  --border-2: 2px;
+  --border-3: 3px;
+  --border-4: 4px;
+
+  /* -------------------------------------------------------------------------
+     SHADOWS
+     ------------------------------------------------------------------------- */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-default: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+  --shadow-equipment: 0 8px 24px -4px rgba(232, 111, 34, 0.15), 0 4px 8px -2px rgba(0, 0, 0, 0.08);
+  --shadow-lift: 0 12px 24px -8px rgba(0, 0, 0, 0.15), 0 4px 8px -4px rgba(0, 0, 0, 0.1);
+
+  /* -------------------------------------------------------------------------
+     TRANSITIONS
+     ------------------------------------------------------------------------- */
+  --duration-instant: 0ms;
+  --duration-fast: 100ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+
+  --ease-linear: linear;
+  --ease-default: ease;
+  --ease-in: ease-in;
+  --ease-out: ease-out;
+  --ease-in-out: ease-in-out;
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* -------------------------------------------------------------------------
+     Z-INDEX
+     ------------------------------------------------------------------------- */
+  --z-hide: -1;
+  --z-base: 0;
+  --z-raised: 1;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-overlay: 1200;
+  --z-modal: 1300;
+  --z-popover: 1400;
+  --z-tooltip: 1500;
+  --z-toast: 1600;
+}
+
+/* ============================================================================
+   BASE STYLES
+   ============================================================================ */
+@layer base {
+  html {
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: var(--leading-normal);
+    color: var(--color-neutral-900);
+    background-color: var(--surface-base);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    min-height: 100vh;
+    background-color: var(--surface-base);
+  }
+
+  /* Headings */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: var(--font-bold);
+    line-height: var(--leading-tight);
+    color: var(--color-neutral-950);
+  }
+
+  h1 {
+    font-size: var(--text-4xl);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  h2 {
+    font-size: var(--text-3xl);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  h3 {
+    font-size: var(--text-2xl);
+  }
+
+  h4 {
+    font-size: var(--text-xl);
+  }
+
+  h5 {
+    font-size: var(--text-lg);
+  }
+
+  h6 {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+  }
+
+  /* Display text (hero headlines) */
+  .display {
+    font-family: var(--font-display);
+    letter-spacing: var(--tracking-widest);
+    text-transform: uppercase;
+  }
+
+  /* Links */
+  a {
+    color: var(--color-primary-600);
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-smooth);
+  }
+
+  a:hover {
+    color: var(--color-accent-500);
+  }
+
+  /* Code */
+  code, pre, kbd, samp {
+    font-family: var(--font-mono);
+  }
+
+  code {
+    font-size: 0.875em;
+    padding: 0.125em 0.375em;
+    background-color: var(--color-neutral-100);
+    border-radius: var(--radius-sm);
+  }
+
+  pre {
+    padding: var(--space-4);
+    background-color: var(--color-neutral-950);
+    color: var(--color-neutral-100);
+    border-radius: var(--radius-lg);
+    overflow-x: auto;
+  }
+
+  pre code {
+    background: none;
+    padding: 0;
+  }
+
+  /* Focus styles */
+  :focus-visible {
+    outline: 2px solid var(--color-accent-500);
+    outline-offset: 2px;
+  }
+
+  /* Selection */
+  ::selection {
+    background-color: var(--color-accent-200);
+    color: var(--color-accent-950);
+  }
+}
+
+/* ============================================================================
+   COMPONENT CLASSES
+   ============================================================================ */
+@layer components {
+  /* -------------------------------------------------------------------------
+     BUTTONS
+     ------------------------------------------------------------------------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-2-5) var(--space-5);
+    font-family: var(--font-heading);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    line-height: var(--leading-tight);
+    border-radius: var(--radius-default);
+    border: var(--border-2) solid transparent;
+    cursor: pointer;
+    transition: all var(--duration-normal) var(--ease-smooth);
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Primary - Burnt Orange CTA */
+  .btn-primary {
+    background-color: var(--color-accent-500);
+    color: white;
+    border-color: var(--color-accent-500);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--color-accent-600);
+    border-color: var(--color-accent-600);
+    box-shadow: var(--shadow-lift);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:active:not(:disabled) {
+    background-color: var(--color-accent-700);
+    border-color: var(--color-accent-700);
+    transform: translateY(0);
+  }
+
+  /* Secondary - Forest Slate */
+  .btn-secondary {
+    background-color: var(--color-primary-500);
+    color: white;
+    border-color: var(--color-primary-500);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background-color: var(--color-primary-600);
+    border-color: var(--color-primary-600);
+  }
+
+  .btn-secondary:active:not(:disabled) {
+    background-color: var(--color-primary-700);
+    border-color: var(--color-primary-700);
+  }
+
+  /* Outline */
+  .btn-outline {
+    background-color: transparent;
+    color: var(--color-primary-700);
+    border-color: var(--color-primary-300);
+  }
+
+  .btn-outline:hover:not(:disabled) {
+    background-color: var(--color-primary-50);
+    border-color: var(--color-primary-400);
+  }
+
+  .btn-outline:active:not(:disabled) {
+    background-color: var(--color-primary-100);
+  }
+
+  /* Ghost */
+  .btn-ghost {
+    background-color: transparent;
+    color: var(--color-neutral-700);
+    border-color: transparent;
+  }
+
+  .btn-ghost:hover:not(:disabled) {
+    background-color: var(--color-neutral-100);
+  }
+
+  .btn-ghost:active:not(:disabled) {
+    background-color: var(--color-neutral-200);
+  }
+
+  /* Danger */
+  .btn-danger {
+    background-color: var(--color-error-main);
+    color: white;
+    border-color: var(--color-error-main);
+  }
+
+  .btn-danger:hover:not(:disabled) {
+    background-color: var(--color-error-dark);
+    border-color: var(--color-error-dark);
+  }
+
+  /* Button sizes */
+  .btn-sm {
+    padding: var(--space-1-5) var(--space-3);
+    font-size: var(--text-xs);
+  }
+
+  .btn-lg {
+    padding: var(--space-3-5) var(--space-7);
+    font-size: var(--text-base);
+  }
+
+  .btn-xl {
+    padding: var(--space-4) var(--space-8);
+    font-size: var(--text-lg);
+  }
+
+  /* -------------------------------------------------------------------------
+     CARDS
+     ------------------------------------------------------------------------- */
+  .card {
+    background-color: var(--surface-elevated);
+    border: var(--border-default) solid var(--color-neutral-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-default);
+    transition: all var(--duration-normal) var(--ease-smooth);
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Equipment Card - Signature style with orange accent */
+  .card-equipment {
+    background-color: var(--surface-elevated);
+    border: var(--border-default) solid var(--color-primary-200);
+    border-left: var(--border-4) solid var(--color-accent-500);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-equipment);
+    transition: all var(--duration-normal) var(--ease-smooth);
+  }
+
+  .card-equipment:hover {
+    box-shadow: var(--shadow-lift);
+    transform: translateY(-2px);
+    border-left-color: var(--color-accent-400);
+  }
+
+  /* Stats Card */
+  .card-stats {
+    background-color: var(--color-primary-50);
+    border: var(--border-default) solid var(--color-primary-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* -------------------------------------------------------------------------
+     INPUTS
+     ------------------------------------------------------------------------- */
+  .input {
+    width: 100%;
+    padding: var(--space-2-5) var(--space-4);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--color-neutral-900);
+    background-color: var(--surface-elevated);
+    border: var(--border-default) solid var(--color-neutral-300);
+    border-radius: var(--radius-default);
+    box-shadow: var(--shadow-inner);
+    transition: all var(--duration-fast) var(--ease-smooth);
+  }
+
+  .input::placeholder {
+    color: var(--color-neutral-400);
+  }
+
+  .input:focus {
+    outline: none;
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 3px rgba(90, 114, 104, 0.15);
+  }
+
+  .input:disabled {
+    background-color: var(--color-neutral-100);
+    cursor: not-allowed;
+  }
+
+  /* Input with error */
+  .input-error {
+    border-color: var(--color-error-main);
+  }
+
+  .input-error:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+  }
+
+  /* Textarea */
+  .textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+
+  /* Select */
+  .select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236e6860' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right var(--space-3) center;
+    background-repeat: no-repeat;
+    background-size: 1.25em 1.25em;
+    padding-right: var(--space-10);
+  }
+
+  /* -------------------------------------------------------------------------
+     LABELS & FORM HELPERS
+     ------------------------------------------------------------------------- */
+  .label {
+    display: block;
+    margin-bottom: var(--space-1-5);
+    font-family: var(--font-heading);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--color-neutral-700);
+  }
+
+  .helper-text {
+    margin-top: var(--space-1);
+    font-size: var(--text-sm);
+    color: var(--color-neutral-500);
+  }
+
+  .error-text {
+    margin-top: var(--space-1);
+    font-size: var(--text-sm);
+    color: var(--color-error-main);
+  }
+
+  /* -------------------------------------------------------------------------
+     BADGES & TAGS
+     ------------------------------------------------------------------------- */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-0-5) var(--space-2);
+    font-family: var(--font-heading);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    border-radius: var(--radius-full);
+  }
+
+  .badge-primary {
+    background-color: var(--color-primary-100);
+    color: var(--color-primary-700);
+  }
+
+  .badge-accent {
+    background-color: var(--color-accent-100);
+    color: var(--color-accent-700);
+  }
+
+  .badge-steel {
+    background-color: var(--color-steel-100);
+    color: var(--color-steel-700);
+  }
+
+  .badge-success {
+    background-color: var(--color-success-light);
+    color: var(--color-success-dark);
+  }
+
+  .badge-warning {
+    background-color: var(--color-warning-light);
+    color: var(--color-warning-dark);
+  }
+
+  .badge-error {
+    background-color: var(--color-error-light);
+    color: var(--color-error-dark);
+  }
+
+  /* -------------------------------------------------------------------------
+     NAVIGATION
+     ------------------------------------------------------------------------- */
+  .nav {
+    background-color: var(--surface-elevated);
+    border-bottom: var(--border-default) solid var(--color-neutral-200);
+  }
+
+  .nav-scrolled {
+    background-color: rgba(250, 250, 249, 0.95);
+    backdrop-filter: blur(8px);
+  }
+
+  .nav-link {
+    padding: var(--space-2) var(--space-3);
+    font-family: var(--font-heading);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--color-neutral-700);
+    border-radius: var(--radius-default);
+    transition: all var(--duration-fast) var(--ease-smooth);
+  }
+
+  .nav-link:hover {
+    color: var(--color-primary-700);
+    background-color: var(--color-neutral-100);
+  }
+
+  .nav-link-active {
+    color: var(--color-primary-700);
+    background-color: var(--color-primary-50);
+  }
+
+  /* -------------------------------------------------------------------------
+     CONTAINERS
+     ------------------------------------------------------------------------- */
+  .container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  @media (min-width: 640px) {
+    .container {
+      max-width: 640px;
+      padding-left: var(--space-6);
+      padding-right: var(--space-6);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .container {
+      max-width: 768px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      max-width: 1024px;
+      padding-left: var(--space-8);
+      padding-right: var(--space-8);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .container {
+      max-width: 1280px;
+    }
+  }
+
+  .container-lg {
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  @media (min-width: 640px) {
+    .container-lg {
+      padding-left: var(--space-6);
+      padding-right: var(--space-6);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container-lg {
+      padding-left: var(--space-8);
+      padding-right: var(--space-8);
+    }
+  }
+
+  /* -------------------------------------------------------------------------
+     SECTION SPACING
+     ------------------------------------------------------------------------- */
+  .section {
+    padding-top: var(--space-16);
+    padding-bottom: var(--space-16);
+  }
+
+  .section-sm {
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-8);
+  }
+
+  .section-lg {
+    padding-top: var(--space-24);
+    padding-bottom: var(--space-24);
+  }
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================ */
+@layer utilities {
+  /* Text colors using design system */
+  .text-primary { color: var(--color-primary-500); }
+  .text-primary-dark { color: var(--color-primary-700); }
+  .text-accent { color: var(--color-accent-500); }
+  .text-steel { color: var(--color-steel-500); }
+  .text-muted { color: var(--color-neutral-500); }
+
+  /* Background colors */
+  .bg-surface { background-color: var(--surface-base); }
+  .bg-elevated { background-color: var(--surface-elevated); }
+  .bg-sunken { background-color: var(--surface-sunken); }
+
+  /* Font families */
+  .font-display { font-family: var(--font-display); }
+  .font-heading { font-family: var(--font-heading); }
+  .font-body { font-family: var(--font-body); }
+  .font-mono { font-family: var(--font-mono); }
+
+  /* Equipment-specific utility */
+  .equipment-shadow { box-shadow: var(--shadow-equipment); }
+  .lift-shadow { box-shadow: var(--shadow-lift); }
+
+  /* Gradient backgrounds */
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-800) 100%);
+  }
+
+  .bg-gradient-accent {
+    background: linear-gradient(135deg, var(--color-accent-500) 0%, var(--color-accent-700) 100%);
+  }
+
+  .bg-gradient-hero {
+    background: linear-gradient(
+      135deg,
+      var(--color-primary-950) 0%,
+      var(--color-primary-800) 50%,
+      var(--color-primary-900) 100%
+    );
+  }
+
+  /* Overlay for images */
+  .overlay-dark {
+    background: linear-gradient(to top, rgba(23, 30, 27, 0.9) 0%, rgba(23, 30, 27, 0.4) 50%, transparent 100%);
+  }
+
+  /* Animations */
+  .animate-lift {
+    transition: transform var(--duration-normal) var(--ease-spring),
+                box-shadow var(--duration-normal) var(--ease-smooth);
+  }
+
+  .animate-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lift);
+  }
+
+  /* Focus ring utility */
+  .focus-ring:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(232, 111, 34, 0.4);
+  }
+
+  /* Truncate text */
+  .truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .truncate-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* ============================================================================
+   PRINT STYLES
+   ============================================================================ */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+
+  a {
+    color: black;
+    text-decoration: underline;
+  }
+
+  .card,
+  .card-equipment {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+}

@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "/workspaces/Peak-R"
+		}
+	],
+	"settings": {
+		"terminal.integrated.allowChords": false,
+		"terminal.integrated.sendKeybindingsToShell": true
+	}
+}

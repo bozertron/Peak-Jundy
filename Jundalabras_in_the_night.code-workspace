@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"chat.tools.terminal.autoApprove": {
+			"git clone": true,
+			"/^cp -r \"/home/bozertron/Applications/Peak/Peak Rentals Application\" /home/bozertron/Applications/Jundalabra/$/": {
+				"approve": true,
+				"matchCommandLine": true
+			}
+		}
+	}
+}

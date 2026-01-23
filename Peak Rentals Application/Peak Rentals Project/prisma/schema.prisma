@@ -1,0 +1,119 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id              String    @id @default(cuid())
+  name            String?
+  email           String?   @unique
+  emailVerified   DateTime?
+  image           String?
+  stripeAccountId String?   @unique
+  role            String    @default("USER")
+
+  accounts        Account[]
+  sessions        Session[]
+  equipment       Equipment[]
+  rentals         Booking[]  @relation("RenterBookings")
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Equipment {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  title       String
+  description String
+  specs       String    // JSON string
+  category    String
+  ownerId     String
+  dailyRate   Int       // In cents
+  available   Boolean   @default(true)
+  hourMeter   Float?
+  image       String?   // Image URL/path
+  location    String?   // Address or location description
+
+  owner       User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  bookings    Booking[]
+
+  @@index([ownerId])
+  @@index([category])
+  @@index([location])
+}
+
+model Booking {
+  id              String    @id @default(cuid())
+  createdAt       DateTime  @default(now())
+  cancelledAt     DateTime?
+  cancellationReason String?
+
+  equipmentId     String
+  renterId        String
+  startDate       DateTime
+  endDate         DateTime
+  totalPrice      Int       // cents
+  status          String    @default("PENDING") // PENDING, CONFIRMED, COMPLETED, CANCELLED
+  stripeSessionId String?   @unique
+
+  equipment       Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  renter          User      @relation("RenterBookings", fields: [renterId], references: [id], onDelete: Cascade)
+
+  @@index([equipmentId])
+  @@index([renterId])
+  @@index([status])
+}
+
+model SearchLog {
+  id        Int      @id @default(autoincrement())
+  query     String
+  userId    String?
+  timestamp DateTime @default(now())
+  fulfilled Boolean  @default(false)
+
+  @@index([fulfilled])
+  @@index([query])
+}
