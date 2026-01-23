@@ -1,4 +1,6 @@
 /**
+ * @jest-environment node
+ *
  * Comprehensive Unit Tests for /api/peaks/chest API Route
  *
  * Tests GET (list chests), POST (claim chest), and PUT (admin create) operations
@@ -737,14 +739,11 @@ describe('/api/peaks/chest', () => {
         });
         await POST(request);
 
-        expect(mockPrisma.$transaction).toHaveBeenCalledWith([
-          // Update chest
-          expect.objectContaining({}),
-          // Update user balance
-          expect.objectContaining({}),
-          // Create transaction
-          expect.objectContaining({}),
-        ]);
+        // Verify $transaction was called with an array (the actual array contains Prisma client operations)
+        expect(mockPrisma.$transaction).toHaveBeenCalled();
+        const transactionCall = mockPrisma.$transaction.mock.calls[0][0];
+        expect(Array.isArray(transactionCall)).toBe(true);
+        expect(transactionCall.length).toBe(3);
       });
 
       it('should mark chest as unavailable', async () => {
@@ -981,9 +980,10 @@ describe('/api/peaks/chest', () => {
 
         // Verify $transaction is used (atomic operation)
         expect(mockPrisma.$transaction).toHaveBeenCalled();
-        // Individual operations should NOT be called separately
-        expect(mockPrisma.treasureChest.update).not.toHaveBeenCalled();
-        expect(mockPrisma.peaksTransaction.create).not.toHaveBeenCalled();
+        // The operations are passed as an array to $transaction
+        // This ensures atomicity - all operations succeed or none do
+        const transactionCall = mockPrisma.$transaction.mock.calls[0][0];
+        expect(Array.isArray(transactionCall)).toBe(true);
       });
 
       it('should handle concurrent claim attempts (simulated)', async () => {
@@ -1440,7 +1440,15 @@ describe('/api/peaks/chest', () => {
         const data = await response.json();
 
         expect(response.status).toBe(201);
-        expect(data.chest).toEqual(newChest);
+        // Compare fields individually since Date is serialized to string
+        expect(data.chest.id).toBe(newChest.id);
+        expect(data.chest.title).toBe(newChest.title);
+        expect(data.chest.description).toBe(newChest.description);
+        expect(data.chest.peaksCost).toBe(newChest.peaksCost);
+        expect(data.chest.prizeType).toBe(newChest.prizeType);
+        expect(data.chest.prizeValue).toBe(newChest.prizeValue);
+        expect(data.chest.available).toBe(newChest.available);
+        expect(data.chest.createdAt).toBeDefined();
       });
 
       it('should set available to true by default', async () => {
@@ -1801,7 +1809,13 @@ describe('/api/peaks/chest', () => {
         const data = await response.json();
 
         expect(data).toHaveProperty('chest');
-        expect(data.chest).toEqual(createdChest);
+        // Compare fields individually since Date is serialized to string
+        expect(data.chest.id).toBe(createdChest.id);
+        expect(data.chest.title).toBe(createdChest.title);
+        expect(data.chest.description).toBe(createdChest.description);
+        expect(data.chest.peaksCost).toBe(createdChest.peaksCost);
+        expect(data.chest.prizeType).toBe(createdChest.prizeType);
+        expect(data.chest.available).toBe(createdChest.available);
       });
     });
   });

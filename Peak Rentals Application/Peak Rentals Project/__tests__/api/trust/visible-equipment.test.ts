@@ -1,4 +1,8 @@
 /**
+ * @jest-environment node
+ */
+
+/**
  * Tests for GET /api/trust/visible-equipment
  *
  * This endpoint returns equipment visible to the user based on their trust network:

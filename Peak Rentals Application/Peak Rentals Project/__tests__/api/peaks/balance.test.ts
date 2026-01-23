@@ -1,4 +1,6 @@
 /**
+ * @jest-environment node
+ *
  * Comprehensive Unit Tests for /api/peaks/balance API Route
  *
  * Tests GET (retrieve balance/history) and POST (award peaks) operations
@@ -538,7 +540,8 @@ describe('/api/peaks/balance', () => {
       // Parameterized tests for all valid reason types
       Object.entries(PEAKS_VALUES).forEach(([reason, expectedAmount]) => {
         it(`should award ${expectedAmount} peaks for reason: ${reason}`, async () => {
-          mockPrisma.peaksTransaction.findFirst.mockResolvedValueOnce(null);
+          // Note: No findFirst mock needed here since no referenceId is provided
+          // and the route only calls findFirst when referenceId exists
           mockPrisma.peaksTransaction.create.mockResolvedValueOnce({
             id: 'new-tx-id',
             userId: TEST_USER_ID,
@@ -593,6 +596,7 @@ describe('/api/peaks/balance', () => {
           createdAt: new Date('2024-01-10'),
         };
 
+        // Must be before any other mocks for this test
         mockPrisma.peaksTransaction.findFirst.mockResolvedValueOnce(existingTransaction);
 
         const request = createMockRequest(TEST_BASE_URL, {
@@ -608,7 +612,10 @@ describe('/api/peaks/balance', () => {
 
         expect(response.status).toBe(400);
         expect(data.error).toBe('Already awarded');
-        expect(data.transaction).toEqual(existingTransaction);
+        // Compare with JSON-serialized version since Response serializes Dates
+        expect(data.transaction.id).toBe(existingTransaction.id);
+        expect(data.transaction.reason).toBe(existingTransaction.reason);
+        expect(data.transaction.referenceId).toBe(existingTransaction.referenceId);
         expect(mockPrisma.peaksTransaction.create).not.toHaveBeenCalled();
       });
 
@@ -814,7 +821,14 @@ describe('/api/peaks/balance', () => {
         const data = await response.json();
 
         expect(response.status).toBe(201);
-        expect(data.transaction).toEqual(createdTransaction);
+        // Compare fields individually since Date is serialized to string
+        expect(data.transaction.id).toBe(createdTransaction.id);
+        expect(data.transaction.userId).toBe(createdTransaction.userId);
+        expect(data.transaction.amount).toBe(createdTransaction.amount);
+        expect(data.transaction.reason).toBe(createdTransaction.reason);
+        expect(data.transaction.referenceId).toBe(createdTransaction.referenceId);
+        expect(data.transaction.referenceType).toBe(createdTransaction.referenceType);
+        expect(data.transaction.createdAt).toBeDefined();
         expect(mockPrisma.peaksTransaction.create).toHaveBeenCalledWith({
           data: {
             userId: TEST_USER_ID,
