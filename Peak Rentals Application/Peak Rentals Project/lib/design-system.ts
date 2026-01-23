@@ -1,8 +1,9 @@
 /**
  * Peak Rentals Design System
- * "Mountain Workshop" - Rugged outdoor authenticity meets refined craftsmanship
+ * "Sophisticated Ski Chalet" - Warmth of a mountain lodge meets precision design
  *
  * Created: January 22, 2026
+ * Transformed: January 23, 2026
  */
 
 // ============================================================================
@@ -10,65 +11,91 @@
 // ============================================================================
 
 export const colors = {
-  // Primary - Deep Forest Slate (Trust & Foundation)
+  // Primary - Deep Forest Green (Trust & Foundation)
   primary: {
-    50: '#f4f6f5',
-    100: '#e3e8e6',
-    200: '#c9d3cf',
-    300: '#a3b3ac',
-    400: '#778d82',
-    500: '#5a7268',  // Main
-    600: '#475c53',
-    700: '#3b4b44',
-    800: '#323e39',
-    900: '#2b3532',
-    950: '#171e1b',
+    50: '#f2f7f5',
+    100: '#dfeae5',
+    200: '#bfd7cc',
+    300: '#96bda9',
+    400: '#5a917a',
+    500: '#2D5A47',  // Main - Deep forest green
+    600: '#254a3b',
+    700: '#1e3d30',
+    800: '#183328',
+    900: '#142a22',
+    950: '#0d1a15',
   },
 
-  // Accent - Burnt Orange (Action & Energy)
+  // Accent - Warm Brass (Action & Warmth)
   accent: {
-    50: '#fef6ee',
-    100: '#fcebd7',
-    200: '#f8d3ae',
-    300: '#f3b47b',
-    400: '#ed8b45',
-    500: '#e86f22',  // Main - Primary CTA
-    600: '#d95518',
-    700: '#b44016',
-    800: '#903419',
-    900: '#742d18',
-    950: '#3e140a',
+    50: '#fdf8e8',
+    100: '#faefcb',
+    200: '#f5db8a',
+    300: '#efc44a',
+    400: '#d9a520',
+    500: '#B8860B',  // Main - Warm gold brass
+    600: '#9a6f09',
+    700: '#7e5a08',
+    800: '#684a0a',
+    900: '#533d0d',
+    950: '#2e2106',
   },
 
-  // Secondary - Steel Blue (Equipment & Industrial)
-  steel: {
-    50: '#f5f7fa',
-    100: '#ebeef3',
-    200: '#d2dbe6',
-    300: '#abbdcf',
-    400: '#7e99b4',
-    500: '#5e7c9b',
-    600: '#4a6481',
-    700: '#3d5169',
-    800: '#364558',
-    900: '#303b4b',
-    950: '#202832',
+  // Secondary - Burgundy (Sophistication)
+  secondary: {
+    50: '#faf5f5',
+    100: '#f5e6e7',
+    200: '#eacbce',
+    300: '#d8a5ab',
+    400: '#b56b75',
+    500: '#722F37',  // Main - Wine red
+    600: '#62262d',
+    700: '#511f25',
+    800: '#451a20',
+    900: '#3a161b',
+    950: '#240c0f',
   },
 
-  // Neutral - Warm Gray (Backgrounds & Text)
+  // Tertiary - Deep Navy (Depth)
+  tertiary: {
+    50: '#f3f6f9',
+    100: '#e2eaf2',
+    200: '#c4d5e5',
+    300: '#9ab8d3',
+    400: '#6592b8',
+    500: '#1E3A5F',  // Main - Deep blue
+    600: '#183050',
+    700: '#132842',
+    800: '#102238',
+    900: '#0d1c2e',
+    950: '#08111c',
+  },
+
+  // Neutral - Cream/Stone (Warm Backgrounds)
   neutral: {
-    50: '#fafaf9',
-    100: '#f5f4f2',
-    200: '#e8e6e3',
-    300: '#d6d3ce',
-    400: '#b8b3ab',
-    500: '#9c968c',
-    600: '#857e74',
-    700: '#6e6860',
-    800: '#5c5751',
-    900: '#4d4945',
+    50: '#FAF7F2',   // Cream - primary background
+    100: '#F5F2ED',
+    200: '#E7E5E4',  // Stone - secondary
+    300: '#D6D3CE',
+    400: '#B8B3AB',
+    500: '#9C968C',
+    600: '#857E74',
+    700: '#6E6860',
+    800: '#5C5751',
+    900: '#4D4945',
     950: '#292724',
   },
+
+  // Additional Accent Colors
+  wood: {
+    light: '#D4A574',
+    main: '#8B6914',
+    dark: '#5D4037',
+  },
+  copper: '#B87333',
+  charcoal: '#2C3E50',
+  snow: '#FFFFFF',
+  slate: '#64748B',
 
   // Semantic Colors
   success: {
@@ -94,10 +121,10 @@ export const colors = {
 
   // Background Surfaces
   surface: {
-    base: '#fafaf9',
-    elevated: '#ffffff',
-    sunken: '#f0efed',
-    overlay: 'rgba(23, 30, 27, 0.8)',
+    base: '#FAF7F2',      // Cream background
+    elevated: '#FFFFFF',   // Snow white cards
+    sunken: '#F5F2ED',
+    overlay: 'rgba(44, 62, 80, 0.8)',  // Charcoal overlay
   },
 } as const;
 
@@ -108,13 +135,13 @@ export const colors = {
 export const typography = {
   // Font Families
   fonts: {
-    // Display: Bold, industrial, stencil-inspired
-    display: '"Bebas Neue", "Impact", sans-serif',
-    // Heading: Strong, geometric, professional
-    heading: '"DM Sans", "Helvetica Neue", sans-serif',
-    // Body: Clean, readable, friendly
-    body: '"Source Sans 3", "Segoe UI", sans-serif',
-    // Mono: Technical, equipment specs
+    // Display: Elegant serif for display
+    display: '"Libre Baskerville", "Georgia", serif',
+    // Heading: Consistent elegance
+    heading: '"Libre Baskerville", "Georgia", serif',
+    // Body: Clean, premium sans-serif
+    body: '"Inter", "Segoe UI", sans-serif',
+    // Mono: Technical
     mono: '"JetBrains Mono", "Consolas", monospace',
   },
 
@@ -159,7 +186,7 @@ export const typography = {
     normal: '0',
     wide: '0.025em',
     wider: '0.05em',
-    widest: '0.15em',  // For display text
+    widest: '0.1em',  // Elegant spacing for serif display
   },
 } as const;
 
@@ -224,21 +251,23 @@ export const borders = {
 
 export const shadows = {
   // Subtle elevation
-  xs: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-  sm: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+  xs: '0 1px 2px 0 rgba(44, 62, 80, 0.05)',
+  sm: '0 1px 3px 0 rgba(44, 62, 80, 0.08), 0 1px 2px -1px rgba(44, 62, 80, 0.08)',
   // Standard cards
-  default: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-  md: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+  default: '0 4px 6px -1px rgba(44, 62, 80, 0.08), 0 2px 4px -2px rgba(44, 62, 80, 0.06)',
+  md: '0 4px 6px -1px rgba(44, 62, 80, 0.08), 0 2px 4px -2px rgba(44, 62, 80, 0.06)',
   // Elevated elements
-  lg: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-  xl: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
-  '2xl': '0 25px 50px -12px rgb(0 0 0 / 0.25)',
+  lg: '0 10px 15px -3px rgba(44, 62, 80, 0.1), 0 4px 6px -4px rgba(44, 62, 80, 0.08)',
+  xl: '0 20px 25px -5px rgba(44, 62, 80, 0.1), 0 8px 10px -6px rgba(44, 62, 80, 0.08)',
+  '2xl': '0 25px 50px -12px rgba(44, 62, 80, 0.2)',
   // Inset for inputs
-  inner: 'inset 0 2px 4px 0 rgb(0 0 0 / 0.05)',
-  // Equipment card signature shadow (warm tint)
-  equipment: '0 8px 24px -4px rgba(232, 111, 34, 0.15), 0 4px 8px -2px rgba(0, 0, 0, 0.08)',
+  inner: 'inset 0 2px 4px 0 rgba(44, 62, 80, 0.04)',
+  // Equipment card signature shadow (charcoal-tinted)
+  equipment: '0 8px 24px -4px rgba(44, 62, 80, 0.15), 0 4px 8px -2px rgba(44, 62, 80, 0.08)',
+  // Framed object shadow - elegant border effect
+  frame: '0 2px 8px rgba(44, 62, 80, 0.08), 0 0 0 1px rgba(231, 229, 228, 0.8)',
   // Hover lift
-  lift: '0 12px 24px -8px rgba(0, 0, 0, 0.15), 0 4px 8px -4px rgba(0, 0, 0, 0.1)',
+  lift: '0 12px 24px -8px rgba(44, 62, 80, 0.15), 0 4px 8px -4px rgba(44, 62, 80, 0.1)',
   none: 'none',
 } as const;
 
@@ -304,16 +333,16 @@ export const components = {
   // Button variants
   button: {
     primary: {
-      bg: colors.accent[500],
-      bgHover: colors.accent[600],
-      bgActive: colors.accent[700],
+      bg: colors.primary[500],          // Forest green
+      bgHover: colors.primary[600],
+      bgActive: colors.primary[700],
       text: '#ffffff',
       border: 'transparent',
     },
     secondary: {
-      bg: colors.primary[500],
-      bgHover: colors.primary[600],
-      bgActive: colors.primary[700],
+      bg: colors.secondary[500],        // Burgundy
+      bgHover: colors.secondary[600],
+      bgActive: colors.secondary[700],
       text: '#ffffff',
       border: 'transparent',
     },
@@ -321,14 +350,14 @@ export const components = {
       bg: 'transparent',
       bgHover: colors.primary[50],
       bgActive: colors.primary[100],
-      text: colors.primary[700],
-      border: colors.primary[300],
+      text: colors.primary[500],
+      border: colors.primary[500],      // Forest border
     },
     ghost: {
       bg: 'transparent',
       bgHover: colors.neutral[100],
       bgActive: colors.neutral[200],
-      text: colors.neutral[700],
+      text: colors.charcoal,
       border: 'transparent',
     },
     danger: {
@@ -349,8 +378,8 @@ export const components = {
     },
     equipment: {
       bg: colors.surface.elevated,
-      border: colors.primary[200],
-      borderLeft: colors.accent[500],
+      border: colors.neutral[200],
+      borderLeft: colors.accent[500],   // Brass left border accent
       shadow: shadows.equipment,
     },
     stats: {
@@ -363,22 +392,22 @@ export const components = {
   // Input styles
   input: {
     bg: colors.surface.elevated,
-    bgFocus: '#ffffff',
+    bgFocus: colors.snow,
     border: colors.neutral[300],
     borderFocus: colors.primary[500],
-    text: colors.neutral[900],
-    placeholder: colors.neutral[400],
+    text: colors.charcoal,
+    placeholder: colors.slate,
     shadow: shadows.inner,
   },
 
   // Navigation
   nav: {
     bg: colors.surface.elevated,
-    bgScrolled: 'rgba(250, 250, 249, 0.95)',
+    bgScrolled: 'rgba(250, 247, 242, 0.95)',  // Cream with transparency
     border: colors.neutral[200],
-    text: colors.neutral[700],
-    textActive: colors.primary[700],
-    accent: colors.accent[500],
+    text: colors.charcoal,
+    textActive: colors.primary[500],
+    accent: colors.accent[500],               // Brass accent
   },
 } as const;
 
