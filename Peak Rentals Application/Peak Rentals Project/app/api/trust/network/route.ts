@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import type { NetworkMember, TrustNetworkResponse } from "@/types/api";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -81,7 +82,7 @@ export async function GET() {
   });
 
   // Deduplicate and structure
-  const networkMap = new Map<string, any>();
+  const networkMap = new Map<string, NetworkMember>();
   
   // Direct connections (degree 1)
   directVouchers.forEach(v => {
