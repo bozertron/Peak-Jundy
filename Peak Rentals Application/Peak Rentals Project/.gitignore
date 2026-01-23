@@ -8,3 +8,8 @@ dist
 prisma/dev.db
 prisma/dev.db-journal
 .DS_Store
+
+# Test coverage and reports
+coverage/
+playwright-report/
+test-results/
