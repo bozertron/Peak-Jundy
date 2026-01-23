@@ -14,12 +14,54 @@
 
 ---
 
+## Technical Implementation
+
+The PEAK AESTHETIC is implemented across three layers:
+
+### 1. Design Tokens (`lib/design-system.ts`)
+TypeScript constants with full 11-shade color scales, typography, spacing, shadows, and component tokens.
+
+### 2. CSS Custom Properties (`styles/globals.css`)
+CSS variables and Tailwind component classes available globally.
+
+### 3. Tailwind Configuration (`tailwind.config.ts`)
+Extended theme with `peak-*` prefixed utilities for use in JSX.
+
+---
+
 ## Color Palette
+
+### Primary - Forest Green (#2D5A47)
+Trust & Foundation. Full scale: 50-950.
+- Use `bg-peak-forest-500` or `var(--color-primary-500)` for main brand
+- Lighter tints (50-300) for backgrounds and hover states
+- Darker shades (600-950) for text and active states
+
+### Accent - Brass (#B8860B)
+Action & Warmth. Full scale: 50-950.
+- Use for CTAs, highlights, and decorative elements
+- The signature "wood accent bar" uses brass gradient
+
+### Secondary - Burgundy (#722F37)
+Sophistication. Full scale: 50-950.
+- Use for secondary actions and premium indicators
+
+### Tertiary - Navy (#1E3A5F)
+Depth. Full scale: 50-950.
+- Use for depth, contrast, and informational elements
+
+### Neutrals - Cream/Stone
+Warm backgrounds throughout.
+- Cream (#FAF7F2) - Primary background
+- Snow (#FFFFFF) - Cards and elevated surfaces
+- Stone (#E7E5E4) - Borders and dividers
+- Charcoal (#2C3E50) - Text color
+- Slate (#64748B) - Muted text
 
 ### Tailwind Configuration
 
 ```javascript
-// tailwind.config.js
+// tailwind.config.ts
 module.exports = {
   theme: {
     extend: {
@@ -28,23 +70,23 @@ module.exports = {
           // === PRIMARY ===
           cream: "#FAF7F2",        // Primary background - warm off-white
           charcoal: "#2C3E50",     // Primary text - blue-black, not pure black
-          
+
           // === WOOD TONES ===
           wood: {
             light: "#D4A574",      // Light oak / ash
             DEFAULT: "#8B6914",    // Medium walnut
             dark: "#5D4037",       // Dark mahogany
           },
-          
-          // === ACCENT COLORS ===
+
+          // === ACCENT COLORS (with full 50-950 scales) ===
           forest: "#2D5A47",       // Deep forest green - primary action
           burgundy: "#722F37",     // Wine red - secondary action
           navy: "#1E3A5F",         // Deep navy - tertiary
-          
+
           // === METAL ACCENTS ===
           brass: "#B8860B",        // Brass/gold accents
           copper: "#B87333",       // Copper touches
-          
+
           // === SUPPORTING ===
           snow: "#FFFFFF",         // Pure white for cards
           slate: "#64748B",        // Muted text
@@ -60,9 +102,13 @@ module.exports = {
         mono: ['"JetBrains Mono"', '"Fira Code"', 'monospace'],
       },
       boxShadow: {
+        'peak-sm': '0 1px 2px 0 rgba(44, 62, 80, 0.05)',
         'peak': '0 2px 8px -2px rgba(44, 62, 80, 0.08), 0 4px 16px -4px rgba(44, 62, 80, 0.12)',
+        'peak-md': '0 2px 8px -2px rgba(44, 62, 80, 0.08), 0 4px 16px -4px rgba(44, 62, 80, 0.12)',
         'peak-lg': '0 4px 16px -4px rgba(44, 62, 80, 0.12), 0 8px 32px -8px rgba(44, 62, 80, 0.16)',
         'peak-frame': '0 0 0 1px rgba(139, 105, 20, 0.1), 0 2px 8px -2px rgba(44, 62, 80, 0.1)',
+        'peak-equipment': '0 0 0 1px rgba(184, 134, 11, 0.15), 0 4px 12px -2px rgba(44, 62, 80, 0.1)',
+        'peak-lift': '0 8px 24px -4px rgba(44, 62, 80, 0.15), 0 16px 40px -8px rgba(44, 62, 80, 0.1)',
       },
       borderRadius: {
         'peak': '0.625rem', // 10px - slightly softer than default
@@ -80,12 +126,38 @@ module.exports = {
 ### CSS Custom Properties
 
 ```css
-/* app/globals.css - Add these at the top */
+/* styles/globals.css - Design system variables */
 
 @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  /* Colors */
+  /* Primary Colors - Full 11-shade scale */
+  --color-primary-50: #f0f7f4;
+  --color-primary-100: #dcebe4;
+  --color-primary-200: #bbd7cc;
+  --color-primary-300: #8dbdab;
+  --color-primary-400: #5d9d86;
+  --color-primary-500: #2D5A47;  /* Base forest green */
+  --color-primary-600: #2a5241;
+  --color-primary-700: #234436;
+  --color-primary-800: #1d372c;
+  --color-primary-900: #182d24;
+  --color-primary-950: #0c1912;
+
+  /* Accent Colors - Brass */
+  --color-accent-50: #fdf8e8;
+  --color-accent-100: #f9edc4;
+  --color-accent-200: #f4dc8a;
+  --color-accent-300: #edc84f;
+  --color-accent-400: #e5b424;
+  --color-accent-500: #B8860B;  /* Base brass */
+  --color-accent-600: #a67a0a;
+  --color-accent-700: #8a6608;
+  --color-accent-800: #6e5107;
+  --color-accent-900: #523d05;
+  --color-accent-950: #362803;
+
+  /* Legacy variable names for compatibility */
   --peak-cream: #FAF7F2;
   --peak-charcoal: #2C3E50;
   --peak-wood: #8B6914;
@@ -137,7 +209,27 @@ body {
   min-height: 100vh;
   line-height: 1.6;
 }
+```
 
+---
+
+## Typography
+
+| Role | Font | Usage |
+|------|------|-------|
+| Display | Libre Baskerville (serif) | Hero headlines, page titles |
+| Heading | Libre Baskerville (serif) | Section headers, card titles |
+| Body | Inter (sans-serif) | Paragraphs, UI text, buttons |
+| Mono | JetBrains Mono | Code, technical specs |
+
+### CSS Classes
+- `.font-peak-display` / `font-serif`
+- `.font-peak-body` / `font-sans`
+- `.font-peak-mono` / `font-mono`
+
+### Typography Utilities
+
+```css
 /* Typography utilities */
 .heading-1 {
   font-family: var(--font-serif);
@@ -179,34 +271,37 @@ body {
   text-transform: uppercase;
   color: var(--peak-slate);
 }
-
-/* The "Frame" - Used for items, cards, photos */
-.peak-frame {
-  background: var(--peak-snow);
-  border-radius: 0.625rem;
-  box-shadow: var(--shadow-frame);
-  border: 1px solid rgba(139, 105, 20, 0.08);
-  overflow: hidden;
-  transition: box-shadow var(--transition-base), transform var(--transition-base);
-}
-
-.peak-frame:hover {
-  box-shadow: var(--shadow-base);
-  transform: translateY(-2px);
-}
-
-/* Wood accent bar - subtle warmth indicator */
-.peak-wood-accent {
-  height: 3px;
-  background: linear-gradient(
-    90deg,
-    var(--peak-wood-light) 0%,
-    var(--peak-wood) 50%,
-    var(--peak-wood-dark) 100%
-  );
-  border-radius: 2px;
-}
 ```
+
+---
+
+## Ready-to-Use Classes
+
+### Buttons
+- `.btn-primary` - Forest green, main CTA
+- `.btn-secondary` - Burgundy, secondary action
+- `.btn-accent` - Brass, special highlight
+- `.btn-outline` - Forest border, transparent bg
+- `.btn-ghost` - Minimal, text-only appearance
+- Sizes: `.btn-sm`, `.btn-md`, `.btn-lg`, `.btn-xl`
+
+### Cards
+- `.card` - Standard elevated card
+- `.card-equipment` - Equipment card with brass accent border
+- `.card-stats` - Stats card with forest tint
+- `.peak-frame` - Curated "framed object" appearance
+
+### Shadows
+- `.shadow-peak-sm/md/lg` - Elevation levels
+- `.shadow-peak-frame` - Elegant framed appearance
+- `.shadow-peak-equipment` - Equipment card signature
+- `.shadow-peak-lift` - Hover lift effect
+
+### PEAK Utilities
+- `.peak-wood-accent` - Decorative wood gradient bar (4px)
+- `.peak-brass-highlight` - Left border brass accent
+- `.hover-lift` - Subtle hover lift animation
+- `.gradient-peak-hero` - Cream to white gradient
 
 ---
 
@@ -227,49 +322,49 @@ interface PeakCardProps {
   children?: React.ReactNode;
 }
 
-export function PeakCard({ 
-  image, 
-  title, 
-  subtitle, 
-  meta, 
-  price, 
+export function PeakCard({
+  image,
+  title,
+  subtitle,
+  meta,
+  price,
   onClick,
-  children 
+  children
 }: PeakCardProps) {
   return (
-    <div 
+    <div
       className="peak-frame cursor-pointer group"
       onClick={onClick}
     >
       {/* Image with frame */}
       {image && (
         <div className="aspect-[4/3] relative overflow-hidden">
-          <img 
-            src={image} 
+          <img
+            src={image}
             alt={title}
-            className="w-full h-full object-cover transition-transform duration-500 
+            className="w-full h-full object-cover transition-transform duration-500
                        group-hover:scale-105"
           />
           {/* Subtle vignette */}
           <div className="absolute inset-0 bg-gradient-to-t from-peak-charcoal/20 to-transparent" />
         </div>
       )}
-      
+
       {/* Content */}
       <div className="p-4 space-y-2">
         {/* Wood accent */}
         <div className="peak-wood-accent w-12 mb-3" />
-        
+
         <h3 className="font-serif text-lg text-peak-charcoal leading-tight">
           {title}
         </h3>
-        
+
         {subtitle && (
           <p className="text-sm text-peak-slate line-clamp-2">
             {subtitle}
           </p>
         )}
-        
+
         <div className="flex items-center justify-between pt-2">
           {meta && (
             <span className="caption">{meta}</span>
@@ -281,7 +376,7 @@ export function PeakCard({
             </span>
           )}
         </div>
-        
+
         {children}
       </div>
     </div>
@@ -318,7 +413,7 @@ export function ContactCard({
   onClick
 }: ContactCardProps) {
   return (
-    <div 
+    <div
       className="peak-frame p-4 cursor-pointer group"
       onClick={onClick}
     >
@@ -337,10 +432,10 @@ export function ContactCard({
               </div>
             )}
           </div>
-          
+
           {/* Founding member badge */}
           {foundingMember && (
-            <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-peak-brass 
+            <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-peak-brass
                             flex items-center justify-center shadow-sm"
                  title="Founding Member">
               <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -349,18 +444,18 @@ export function ContactCard({
             </div>
           )}
         </div>
-        
+
         {/* Info */}
         <div className="flex-1 min-w-0">
           <h4 className="font-serif text-peak-charcoal truncate">{name}</h4>
-          
+
           {flavor && (
-            <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-xs 
+            <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-xs
                              bg-peak-forest/10 text-peak-forest">
               {flavor}
             </span>
           )}
-          
+
           <div className="mt-2 flex items-center gap-3 text-xs text-peak-slate">
             {itemCount !== undefined && (
               <span>{itemCount} items</span>
@@ -369,7 +464,7 @@ export function ContactCard({
               <span>Since {new Date(memberSince).getFullYear()}</span>
             )}
           </div>
-          
+
           {/* Trust chain indicator */}
           {degree && degree > 1 && introducedBy && (
             <p className="mt-2 text-xs text-peak-slate/70">
@@ -377,12 +472,12 @@ export function ContactCard({
             </p>
           )}
         </div>
-        
+
         {/* Connection degree indicator */}
         {degree && (
           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium
-                          ${degree === 1 
-                            ? 'bg-peak-forest text-white' 
+                          ${degree === 1
+                            ? 'bg-peak-forest text-white'
                             : 'bg-peak-stone text-peak-slate'}`}>
             {degree}°
           </div>
@@ -402,8 +497,8 @@ import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
 interface PeakButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "ghost" | "outline";
-  size?: "sm" | "md" | "lg";
+  variant?: "primary" | "secondary" | "accent" | "ghost" | "outline";
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 export const PeakButton = forwardRef<HTMLButtonElement, PeakButtonProps>(
@@ -413,34 +508,40 @@ export const PeakButton = forwardRef<HTMLButtonElement, PeakButtonProps>(
       transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2
       disabled:opacity-50 disabled:cursor-not-allowed
     `;
-    
+
     const variants = {
       primary: `
-        bg-peak-forest text-white 
-        hover:bg-peak-forest/90 
+        bg-peak-forest text-white
+        hover:bg-peak-forest/90
         focus:ring-peak-forest/50
       `,
       secondary: `
-        bg-peak-burgundy text-white 
-        hover:bg-peak-burgundy/90 
+        bg-peak-burgundy text-white
+        hover:bg-peak-burgundy/90
         focus:ring-peak-burgundy/50
       `,
+      accent: `
+        bg-peak-brass text-white
+        hover:bg-peak-brass/90
+        focus:ring-peak-brass/50
+      `,
       ghost: `
-        bg-transparent text-peak-charcoal 
-        hover:bg-peak-stone/50 
+        bg-transparent text-peak-charcoal
+        hover:bg-peak-stone/50
         focus:ring-peak-charcoal/20
       `,
       outline: `
-        bg-transparent text-peak-charcoal border border-peak-wood/30
-        hover:bg-peak-wood/5 hover:border-peak-wood/50
-        focus:ring-peak-wood/30
+        bg-transparent text-peak-forest border border-peak-forest/30
+        hover:bg-peak-forest/5 hover:border-peak-forest/50
+        focus:ring-peak-forest/30
       `,
     };
-    
+
     const sizes = {
       sm: "text-sm px-3 py-1.5",
       md: "text-sm px-4 py-2.5",
       lg: "text-base px-6 py-3",
+      xl: "text-lg px-8 py-4",
     };
 
     return (
@@ -514,6 +615,61 @@ PeakInput.displayName = "PeakInput";
 
 ---
 
+## The "Frame" Component
+
+Used for items, cards, photos - the signature "curated" appearance.
+
+```css
+/* The "Frame" - Used for items, cards, photos */
+.peak-frame {
+  background: var(--peak-snow);
+  border-radius: 0.625rem;
+  box-shadow: var(--shadow-frame);
+  border: 1px solid rgba(139, 105, 20, 0.08);
+  overflow: hidden;
+  transition: box-shadow var(--transition-base), transform var(--transition-base);
+}
+
+.peak-frame:hover {
+  box-shadow: var(--shadow-base);
+  transform: translateY(-2px);
+}
+
+/* Wood accent bar - subtle warmth indicator */
+.peak-wood-accent {
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--peak-wood-light) 0%,
+    var(--peak-brass) 50%,
+    var(--peak-wood-dark) 100%
+  );
+  border-radius: 2px;
+}
+
+/* Brass highlight - left border accent */
+.peak-brass-highlight {
+  border-left: 3px solid var(--peak-brass);
+}
+
+/* Hover lift animation */
+.hover-lift {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Hero gradient */
+.gradient-peak-hero {
+  background: linear-gradient(180deg, var(--peak-cream) 0%, var(--peak-snow) 100%);
+}
+```
+
+---
+
 ## Map Pin Design
 
 ### Equipment Pin
@@ -539,25 +695,25 @@ const categoryIcons: Record<string, string> = {
 
 export function EquipmentPin({ category, selected, onClick }: EquipmentPinProps) {
   const icon = categoryIcons[category] || categoryIcons.default;
-  
+
   return (
     <button
       onClick={onClick}
       className={`
-        relative w-10 h-10 rounded-full 
+        relative w-10 h-10 rounded-full
         flex items-center justify-center text-lg
         transition-all duration-200
-        ${selected 
-          ? 'bg-peak-forest text-white scale-125 shadow-lg z-10' 
+        ${selected
+          ? 'bg-peak-forest text-white scale-125 shadow-peak-lg z-10'
           : 'bg-peak-snow text-peak-charcoal shadow-peak hover:scale-110'}
         border-2 ${selected ? 'border-peak-forest' : 'border-peak-wood-light/50'}
       `}
     >
       <span>{icon}</span>
-      
+
       {/* Drop shadow / pin tail */}
       <div className={`
-        absolute -bottom-1 left-1/2 -translate-x-1/2 
+        absolute -bottom-1 left-1/2 -translate-x-1/2
         w-2 h-2 rotate-45
         ${selected ? 'bg-peak-forest' : 'bg-peak-snow border-r border-b border-peak-wood-light/50'}
       `} />
@@ -597,11 +753,11 @@ export function AppShell({ children, sidebar }: AppShellProps) {
               Peak
             </span>
           </div>
-          
+
           {/* Nav would go here */}
         </div>
       </header>
-      
+
       <div className="flex">
         {/* Optional sidebar */}
         {sidebar && (
@@ -609,7 +765,7 @@ export function AppShell({ children, sidebar }: AppShellProps) {
             {sidebar}
           </aside>
         )}
-        
+
         {/* Main content */}
         <main className="flex-1">
           {children}
@@ -747,11 +903,17 @@ All images should feel "framed" and curated:
 | Card background | `bg-peak-snow` |
 | Primary text | `text-peak-charcoal` |
 | Secondary text | `text-peak-slate` |
-| Primary action | `bg-peak-forest text-white` |
-| Secondary action | `bg-peak-burgundy text-white` |
-| Accent/highlight | `text-peak-brass` or `border-peak-wood` |
-| Heading font | `font-serif` |
-| Body font | `font-sans` |
-| Card frame | `peak-frame` |
+| Primary action | `bg-peak-forest text-white` or `.btn-primary` |
+| Secondary action | `bg-peak-burgundy text-white` or `.btn-secondary` |
+| Accent/highlight | `text-peak-brass` or `border-peak-brass` |
+| Heading font | `font-serif` or `font-peak-display` |
+| Body font | `font-sans` or `font-peak-body` |
+| Card frame | `.peak-frame` or `.card` |
+| Equipment card | `.card-equipment` |
 | Standard radius | `rounded-peak` |
-| Standard shadow | `shadow-peak` |
+| Standard shadow | `shadow-peak` or `shadow-peak-md` |
+| Frame shadow | `shadow-peak-frame` |
+| Lift shadow | `shadow-peak-lift` |
+| Wood accent | `.peak-wood-accent` |
+| Brass highlight | `.peak-brass-highlight` |
+| Hover lift | `.hover-lift` |

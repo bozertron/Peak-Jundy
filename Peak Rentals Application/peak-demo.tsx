@@ -1,5 +1,5 @@
 // Peak Rentals - Interactive UI Demo
-// This file demonstrates the complete aesthetic system in action
+// This file demonstrates the complete PEAK AESTHETIC system in action
 // Save as: components/demo/PeakDemo.tsx
 
 "use client";
@@ -7,22 +7,81 @@
 import { useState } from "react";
 
 // ============================================
-// COLOR PALETTE REFERENCE
+// PEAK AESTHETIC COLOR PALETTE REFERENCE
 // ============================================
-const colors = {
-  cream: "#FAF7F2",
-  charcoal: "#2C3E50",
-  woodLight: "#D4A574",
-  wood: "#8B6914",
-  woodDark: "#5D4037",
-  forest: "#2D5A47",
-  burgundy: "#722F37",
-  navy: "#1E3A5F",
-  brass: "#B8860B",
-  copper: "#B87333",
-  snow: "#FFFFFF",
-  slate: "#64748B",
-  stone: "#E7E5E4",
+// These colors are now available as Tailwind classes:
+// - bg-peak-forest-{100-900}, text-peak-forest-{100-900}
+// - bg-peak-brass-{100-900}, text-peak-brass-{100-900}
+// - bg-peak-burgundy-{100-900}, text-peak-burgundy-{100-900}
+// - bg-peak-navy-{100-900}, text-peak-navy-{100-900}
+// - bg-peak-cream, bg-peak-snow
+// - text-peak-charcoal, text-peak-slate
+
+const peakColors = {
+  // Primary - Forest Green (Trust, Nature, Stability)
+  forest: {
+    name: "Forest Green",
+    role: "Primary",
+    hex: "#2D5A47",
+    usage: "Primary buttons, key actions, badges",
+    tailwind: "bg-peak-forest-500"
+  },
+  // Accent - Brass (Warmth, Premium, Heritage)
+  brass: {
+    name: "Brass",
+    role: "Accent",
+    hex: "#B8860B",
+    usage: "CTA buttons, highlights, founding badges",
+    tailwind: "bg-peak-brass-500"
+  },
+  // Secondary - Burgundy (Sophistication, Warmth)
+  burgundy: {
+    name: "Burgundy",
+    role: "Secondary",
+    hex: "#722F37",
+    usage: "Secondary buttons, alerts, accents",
+    tailwind: "bg-peak-burgundy-500"
+  },
+  // Tertiary - Navy (Depth, Professionalism)
+  navy: {
+    name: "Navy",
+    role: "Tertiary",
+    hex: "#1E3A5F",
+    usage: "Headers, navigation, dark accents",
+    tailwind: "bg-peak-navy-500"
+  },
+  // Background - Cream (Warmth, Comfort)
+  cream: {
+    name: "Cream",
+    role: "Background",
+    hex: "#FAF7F2",
+    usage: "Main background, warm base",
+    tailwind: "bg-peak-cream"
+  },
+  // Card Background - Snow
+  snow: {
+    name: "Snow",
+    role: "Card Background",
+    hex: "#FFFFFF",
+    usage: "Cards, modals, elevated surfaces",
+    tailwind: "bg-peak-snow"
+  },
+  // Text - Charcoal
+  charcoal: {
+    name: "Charcoal",
+    role: "Text Primary",
+    hex: "#2C3E50",
+    usage: "Main text, headings",
+    tailwind: "text-peak-charcoal"
+  },
+  // Text Muted - Slate
+  slate: {
+    name: "Slate",
+    role: "Text Secondary",
+    hex: "#64748B",
+    usage: "Muted text, descriptions",
+    tailwind: "text-peak-slate"
+  },
 };
 
 // ============================================
@@ -39,7 +98,7 @@ const demoEquipment = [
     owner: { name: "Dave Mitchell", flavor: "Heavy Equipment", avatar: null }
   },
   {
-    id: "2", 
+    id: "2",
     title: "1979 60ft JLG Boom Lift",
     description: "Classic boom lift, perfect for high-reach projects.",
     category: "Aerial Lift",
@@ -66,15 +125,17 @@ const demoContacts = [
 
 // ============================================
 // PEAK CARD COMPONENT
+// Uses: bg-peak-snow, shadow-peak-card, hover:shadow-peak-lift
+// Font: font-serif for titles, font-sans for body
 // ============================================
-function PeakCard({ 
-  image, 
-  title, 
-  description, 
-  category, 
+function PeakCard({
+  image,
+  title,
+  description,
+  category,
   dailyRate,
   owner,
-  onClick 
+  onClick
 }: {
   image?: string;
   title: string;
@@ -85,128 +146,58 @@ function PeakCard({
   onClick?: () => void;
 }) {
   return (
-    <div 
-      className="group cursor-pointer"
+    <div
+      className="group cursor-pointer bg-peak-snow rounded-[10px] shadow-peak-card hover:shadow-peak-lift overflow-hidden transition-all duration-300 hover:-translate-y-1 border-l-4 border-peak-brass-500"
       onClick={onClick}
-      style={{
-        background: colors.snow,
-        borderRadius: "10px",
-        boxShadow: `0 0 0 1px ${colors.wood}15, 0 2px 8px -2px ${colors.charcoal}15`,
-        overflow: "hidden",
-        transition: "all 0.25s ease",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = `0 4px 16px -4px ${colors.charcoal}20`;
-        e.currentTarget.style.transform = "translateY(-4px)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = `0 0 0 1px ${colors.wood}15, 0 2px 8px -2px ${colors.charcoal}15`;
-        e.currentTarget.style.transform = "translateY(0)";
-      }}
     >
       {image && (
-        <div style={{ aspectRatio: "4/3", position: "relative", overflow: "hidden" }}>
-          <img 
-            src={image} 
+        <div className="aspect-[4/3] relative overflow-hidden">
+          <img
+            src={image}
             alt={title}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              transition: "transform 0.5s ease",
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
-            onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
-          <div style={{
-            position: "absolute",
-            inset: 0,
-            background: `linear-gradient(to top, ${colors.charcoal}30, transparent)`
-          }} />
+          <div className="absolute inset-0 bg-gradient-to-t from-peak-charcoal/30 to-transparent" />
         </div>
       )}
-      
-      <div style={{ padding: "16px" }}>
-        {/* Wood accent bar */}
-        <div style={{
-          width: "48px",
-          height: "3px",
-          borderRadius: "2px",
-          background: `linear-gradient(90deg, ${colors.woodLight}, ${colors.wood}, ${colors.woodDark})`,
-          marginBottom: "12px"
-        }} />
-        
-        <h3 style={{
-          fontFamily: "'Libre Baskerville', Georgia, serif",
-          fontSize: "18px",
-          color: colors.charcoal,
-          margin: "0 0 8px 0",
-          lineHeight: 1.3
-        }}>
+
+      <div className="p-4">
+        {/* Peak wood accent bar */}
+        <div className="peak-wood-accent w-12 h-[3px] rounded-sm mb-3" />
+
+        <h3 className="font-serif text-lg text-peak-charcoal mb-2 leading-tight">
           {title}
         </h3>
-        
+
         {description && (
-          <p style={{
-            fontSize: "14px",
-            color: colors.slate,
-            margin: "0 0 12px 0",
-            lineHeight: 1.5,
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden"
-          }}>
+          <p className="font-sans text-sm text-peak-slate mb-3 leading-relaxed line-clamp-2">
             {description}
           </p>
         )}
-        
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+
+        <div className="flex items-center justify-between">
           {category && (
-            <span style={{
-              fontSize: "11px",
-              letterSpacing: "0.05em",
-              textTransform: "uppercase",
-              color: colors.slate
-            }}>
+            <span className="font-sans text-xs tracking-wide uppercase text-peak-slate">
               {category}
             </span>
           )}
           {dailyRate !== undefined && (
-            <span style={{ fontWeight: 600, color: colors.forest }}>
+            <span className="font-semibold text-peak-forest-600">
               ${(dailyRate / 100).toFixed(0)}
-              <span style={{ fontWeight: 400, color: colors.slate, fontSize: "14px" }}>/day</span>
+              <span className="font-normal text-peak-slate text-sm">/day</span>
             </span>
           )}
         </div>
-        
+
         {owner && (
-          <div style={{
-            marginTop: "12px",
-            paddingTop: "12px",
-            borderTop: `1px solid ${colors.stone}`,
-            display: "flex",
-            alignItems: "center",
-            gap: "8px"
-          }}>
-            <div style={{
-              width: "28px",
-              height: "28px",
-              borderRadius: "6px",
-              background: `${colors.forest}15`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "12px",
-              fontFamily: "'Libre Baskerville', serif",
-              color: colors.forest
-            }}>
+          <div className="mt-3 pt-3 border-t border-stone-200 flex items-center gap-2">
+            <div className="w-7 h-7 rounded-md bg-peak-forest-100 flex items-center justify-center font-serif text-xs text-peak-forest-600">
               {owner.name.charAt(0)}
             </div>
             <div>
-              <div style={{ fontSize: "13px", color: colors.charcoal }}>{owner.name}</div>
+              <div className="font-sans text-[13px] text-peak-charcoal">{owner.name}</div>
               {owner.flavor && (
-                <div style={{ fontSize: "11px", color: colors.slate }}>{owner.flavor}</div>
+                <div className="font-sans text-[11px] text-peak-slate">{owner.flavor}</div>
               )}
             </div>
           </div>
@@ -218,6 +209,7 @@ function PeakCard({
 
 // ============================================
 // CONTACT CARD COMPONENT
+// Uses: bg-peak-snow, shadow-peak-card, bg-peak-forest for badges
 // ============================================
 function ContactCard({
   name,
@@ -239,127 +231,60 @@ function ContactCard({
   onClick?: () => void;
 }) {
   return (
-    <div 
+    <div
       onClick={onClick}
-      style={{
-        background: colors.snow,
-        borderRadius: "10px",
-        boxShadow: `0 0 0 1px ${colors.wood}15, 0 2px 8px -2px ${colors.charcoal}15`,
-        padding: "16px",
-        cursor: "pointer",
-        transition: "all 0.25s ease",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = `0 4px 16px -4px ${colors.charcoal}20`;
-        e.currentTarget.style.transform = "translateY(-2px)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = `0 0 0 1px ${colors.wood}15, 0 2px 8px -2px ${colors.charcoal}15`;
-        e.currentTarget.style.transform = "translateY(0)";
-      }}
+      className="bg-peak-snow rounded-[10px] shadow-peak-card p-4 cursor-pointer transition-all duration-300 hover:shadow-peak-lift hover:-translate-y-0.5"
     >
-      <div style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}>
+      <div className="flex items-start gap-4">
         {/* Avatar */}
-        <div style={{ position: "relative" }}>
-          <div style={{
-            width: "64px",
-            height: "64px",
-            borderRadius: "8px",
-            border: `2px solid ${colors.woodLight}50`,
-            background: `${colors.forest}10`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center"
-          }}>
-            <span style={{
-              fontSize: "24px",
-              fontFamily: "'Libre Baskerville', serif",
-              color: colors.forest
-            }}>
+        <div className="relative">
+          <div className="w-16 h-16 rounded-lg border-2 border-peak-brass-200 bg-peak-forest-50 flex items-center justify-center">
+            <span className="font-serif text-2xl text-peak-forest-600">
               {name.charAt(0)}
             </span>
           </div>
-          
+
           {foundingMember && (
-            <div style={{
-              position: "absolute",
-              top: "-4px",
-              right: "-4px",
-              width: "20px",
-              height: "20px",
-              borderRadius: "50%",
-              background: colors.brass,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.2)"
-            }} title="Founding Member">
-              <span style={{ color: "white", fontSize: "10px" }}>★</span>
+            <div
+              className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-peak-brass-500 flex items-center justify-center shadow-md"
+              title="Founding Member"
+            >
+              <span className="text-white text-[10px]">★</span>
             </div>
           )}
         </div>
-        
+
         {/* Info */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h4 style={{
-            fontFamily: "'Libre Baskerville', serif",
-            fontSize: "16px",
-            color: colors.charcoal,
-            margin: 0
-          }}>
+        <div className="flex-1 min-w-0">
+          <h4 className="font-serif text-base text-peak-charcoal m-0">
             {name}
           </h4>
-          
+
           {flavor && (
-            <span style={{
-              display: "inline-block",
-              marginTop: "6px",
-              padding: "2px 8px",
-              borderRadius: "12px",
-              fontSize: "11px",
-              background: `${colors.forest}15`,
-              color: colors.forest
-            }}>
+            <span className="inline-block mt-1.5 px-2 py-0.5 rounded-xl text-[11px] bg-peak-forest-100 text-peak-forest-600">
               {flavor}
             </span>
           )}
-          
-          <div style={{
-            marginTop: "8px",
-            display: "flex",
-            gap: "12px",
-            fontSize: "12px",
-            color: colors.slate
-          }}>
+
+          <div className="mt-2 flex gap-3 font-sans text-xs text-peak-slate">
             {itemCount !== undefined && <span>{itemCount} items</span>}
             {memberSince && <span>Since {new Date(memberSince).getFullYear()}</span>}
           </div>
-          
+
           {degree && degree > 1 && introducedBy && (
-            <p style={{
-              marginTop: "8px",
-              fontSize: "11px",
-              color: `${colors.slate}99`
-            }}>
+            <p className="mt-2 font-sans text-[11px] text-peak-slate/60">
               via {introducedBy}
             </p>
           )}
         </div>
-        
+
         {/* Degree indicator */}
         {degree && (
-          <div style={{
-            width: "32px",
-            height: "32px",
-            borderRadius: "50%",
-            background: degree === 1 ? colors.forest : colors.stone,
-            color: degree === 1 ? "white" : colors.slate,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "12px",
-            fontWeight: 500
-          }}>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-sans text-xs font-medium ${
+            degree === 1
+              ? 'bg-peak-forest-500 text-white'
+              : 'bg-stone-200 text-peak-slate'
+          }`}>
             {degree}°
           </div>
         )}
@@ -369,58 +294,40 @@ function ContactCard({
 }
 
 // ============================================
-// BUTTON COMPONENT
+// PEAK BUTTON COMPONENT
+// Variants: primary (forest), secondary (burgundy), accent (brass), outline (forest border)
 // ============================================
-function PeakButton({ 
-  variant = "primary", 
+function PeakButton({
+  variant = "primary",
   size = "md",
   children,
   onClick
 }: {
-  variant?: "primary" | "secondary" | "outline" | "ghost";
+  variant?: "primary" | "secondary" | "accent" | "outline" | "ghost";
   size?: "sm" | "md" | "lg";
   children: React.ReactNode;
   onClick?: () => void;
 }) {
-  const baseStyle: React.CSSProperties = {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "8px",
-    borderRadius: "10px",
-    fontWeight: 500,
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-    border: "none",
-    fontFamily: "'Inter', system-ui, sans-serif",
+  const baseClasses = "inline-flex items-center justify-center gap-2 rounded-[10px] font-medium cursor-pointer transition-all duration-200 font-sans border-none";
+
+  const variantClasses = {
+    primary: "bg-peak-forest-500 hover:bg-peak-forest-600 text-white shadow-peak-card hover:shadow-peak-lift",
+    secondary: "bg-peak-burgundy-500 hover:bg-peak-burgundy-600 text-white shadow-peak-card hover:shadow-peak-lift",
+    accent: "bg-peak-brass-500 hover:bg-peak-brass-600 text-white shadow-peak-card hover:shadow-peak-lift",
+    outline: "bg-transparent border border-peak-forest-500 text-peak-forest-600 hover:bg-peak-forest-50",
+    ghost: "bg-transparent text-peak-charcoal hover:bg-stone-100",
   };
-  
-  const variants: Record<string, React.CSSProperties> = {
-    primary: { background: colors.forest, color: "white" },
-    secondary: { background: colors.burgundy, color: "white" },
-    outline: { background: "transparent", color: colors.charcoal, border: `1px solid ${colors.wood}50` },
-    ghost: { background: "transparent", color: colors.charcoal },
+
+  const sizeClasses = {
+    sm: "text-[13px] px-3 py-1.5",
+    md: "text-sm px-4 py-2.5",
+    lg: "text-base px-6 py-3",
   };
-  
-  const sizes: Record<string, React.CSSProperties> = {
-    sm: { fontSize: "13px", padding: "6px 12px" },
-    md: { fontSize: "14px", padding: "10px 16px" },
-    lg: { fontSize: "16px", padding: "12px 24px" },
-  };
-  
+
   return (
-    <button 
-      style={{ ...baseStyle, ...variants[variant], ...sizes[size] }}
+    <button
+      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]}`}
       onClick={onClick}
-      onMouseEnter={(e) => {
-        if (variant === "primary") e.currentTarget.style.background = `${colors.forest}ee`;
-        if (variant === "secondary") e.currentTarget.style.background = `${colors.burgundy}ee`;
-        if (variant === "outline") e.currentTarget.style.background = `${colors.wood}10`;
-        if (variant === "ghost") e.currentTarget.style.background = `${colors.stone}80`;
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background = variants[variant].background as string;
-      }}
     >
       {children}
     </button>
@@ -432,57 +339,24 @@ function PeakButton({
 // ============================================
 export default function PeakDemo() {
   const [activeTab, setActiveTab] = useState<"equipment" | "network" | "components">("equipment");
-  
+
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: colors.cream,
-      fontFamily: "'Inter', system-ui, sans-serif",
-      color: colors.charcoal
-    }}>
+    <div className="min-h-screen bg-peak-cream font-sans text-peak-charcoal">
       {/* Header */}
-      <header style={{
-        background: `${colors.snow}cc`,
-        backdropFilter: "blur(8px)",
-        borderBottom: `1px solid ${colors.stone}`,
-        position: "sticky",
-        top: 0,
-        zIndex: 50
-      }}>
-        <div style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-          padding: "0 24px",
-          height: "64px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between"
-        }}>
+      <header className="bg-peak-snow/80 backdrop-blur-md border-b border-stone-200 sticky top-0 z-50">
+        <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
           {/* Logo */}
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div style={{
-              width: "36px",
-              height: "36px",
-              borderRadius: "8px",
-              background: colors.forest,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "20px"
-            }}>
-              ⛰️
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-peak-forest-500 flex items-center justify-center text-xl text-white">
+              P
             </div>
-            <span style={{
-              fontFamily: "'Libre Baskerville', serif",
-              fontSize: "22px",
-              color: colors.charcoal
-            }}>
+            <span className="font-serif text-[22px] text-peak-charcoal">
               Peak
             </span>
           </div>
-          
+
           {/* Nav */}
-          <div style={{ display: "flex", gap: "8px" }}>
+          <div className="flex gap-2">
             {[
               { key: "equipment", label: "Equipment" },
               { key: "network", label: "Network" },
@@ -490,81 +364,48 @@ export default function PeakDemo() {
             ].map(tab => (
               <button
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key as any)}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: "8px",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                  fontWeight: 500,
-                  background: activeTab === tab.key ? `${colors.forest}15` : "transparent",
-                  color: activeTab === tab.key ? colors.forest : colors.charcoal,
-                  transition: "all 0.2s ease"
-                }}
+                onClick={() => setActiveTab(tab.key as "equipment" | "network" | "components")}
+                className={`px-4 py-2 rounded-lg border-none cursor-pointer text-sm font-medium transition-all duration-200 ${
+                  activeTab === tab.key
+                    ? 'bg-peak-forest-100 text-peak-forest-600'
+                    : 'bg-transparent text-peak-charcoal hover:bg-stone-100'
+                }`}
               >
                 {tab.label}
               </button>
             ))}
           </div>
-          
+
           {/* User */}
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              padding: "6px 12px",
-              background: `${colors.brass}15`,
-              borderRadius: "8px"
-            }}>
-              <span style={{ fontSize: "14px" }}>⛰️</span>
-              <span style={{ fontSize: "14px", fontWeight: 600, color: colors.brass }}>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-peak-brass-100 rounded-lg">
+              <span className="text-sm">P</span>
+              <span className="text-sm font-semibold text-peak-brass-600">
                 245 Peaks
               </span>
             </div>
-            <div style={{
-              width: "36px",
-              height: "36px",
-              borderRadius: "8px",
-              background: `${colors.forest}15`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontFamily: "'Libre Baskerville', serif",
-              color: colors.forest,
-              cursor: "pointer"
-            }}>
+            <div className="w-9 h-9 rounded-lg bg-peak-forest-100 flex items-center justify-center font-serif text-peak-forest-600 cursor-pointer hover:bg-peak-forest-200 transition-colors">
               B
             </div>
           </div>
         </div>
       </header>
-      
+
       {/* Main Content */}
-      <main style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 24px" }}>
+      <main className="max-w-[1200px] mx-auto px-6 py-8">
         {/* Equipment Tab */}
         {activeTab === "equipment" && (
           <div>
-            <div style={{ marginBottom: "32px" }}>
-              <h1 style={{
-                fontFamily: "'Libre Baskerville', serif",
-                fontSize: "32px",
-                fontWeight: 700,
-                margin: "0 0 8px 0"
-              }}>
+            <div className="mb-8">
+              <h1 className="font-serif text-[32px] font-bold m-0 mb-2 text-peak-charcoal">
                 Discover Equipment
               </h1>
-              <p style={{ color: colors.slate, fontSize: "16px", margin: 0 }}>
+              <p className="text-peak-slate text-base m-0 font-sans">
                 Browse items from your trusted network
               </p>
             </div>
-            
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-              gap: "24px"
-            }}>
+
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-6">
               {demoEquipment.map(item => (
                 <PeakCard
                   key={item.id}
@@ -579,230 +420,242 @@ export default function PeakDemo() {
             </div>
           </div>
         )}
-        
+
         {/* Network Tab */}
         {activeTab === "network" && (
           <div>
-            <div style={{ marginBottom: "32px" }}>
-              <h1 style={{
-                fontFamily: "'Libre Baskerville', serif",
-                fontSize: "32px",
-                fontWeight: 700,
-                margin: "0 0 8px 0"
-              }}>
+            <div className="mb-8">
+              <h1 className="font-serif text-[32px] font-bold m-0 mb-2 text-peak-charcoal">
                 Your Network
               </h1>
-              <p style={{ color: colors.slate, fontSize: "16px", margin: 0 }}>
+              <p className="text-peak-slate text-base m-0 font-sans">
                 People you can trade with through trusted connections
               </p>
             </div>
-            
+
             {/* Stats */}
-            <div style={{
-              display: "flex",
-              gap: "24px",
-              marginBottom: "32px"
-            }}>
+            <div className="flex gap-6 mb-8">
               {[
-                { label: "Direct", value: 2, color: colors.forest },
-                { label: "Extended", value: 1, color: colors.slate },
-                { label: "Total", value: 3, color: colors.charcoal }
+                { label: "Direct", value: 2, colorClass: "text-peak-forest-500" },
+                { label: "Extended", value: 1, colorClass: "text-peak-slate" },
+                { label: "Total", value: 3, colorClass: "text-peak-charcoal" }
               ].map(stat => (
-                <div key={stat.label} style={{
-                  background: colors.snow,
-                  borderRadius: "10px",
-                  padding: "16px 24px",
-                  boxShadow: `0 0 0 1px ${colors.wood}15`
-                }}>
-                  <div style={{ fontSize: "32px", fontWeight: 700, color: stat.color }}>
+                <div key={stat.label} className="bg-peak-snow rounded-[10px] px-6 py-4 shadow-peak-card">
+                  <div className={`text-[32px] font-bold ${stat.colorClass}`}>
                     {stat.value}
                   </div>
-                  <div style={{ fontSize: "13px", color: colors.slate, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  <div className="font-sans text-[13px] text-peak-slate uppercase tracking-wide">
                     {stat.label}
                   </div>
                 </div>
               ))}
             </div>
-            
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+
+            <div className="flex flex-col gap-3">
               {demoContacts.map(contact => (
                 <ContactCard key={contact.id} {...contact} />
               ))}
             </div>
           </div>
         )}
-        
+
         {/* Components Tab */}
         {activeTab === "components" && (
           <div>
-            <div style={{ marginBottom: "32px" }}>
-              <h1 style={{
-                fontFamily: "'Libre Baskerville', serif",
-                fontSize: "32px",
-                fontWeight: 700,
-                margin: "0 0 8px 0"
-              }}>
-                Component Library
+            <div className="mb-8">
+              <h1 className="font-serif text-[32px] font-bold m-0 mb-2 text-peak-charcoal">
+                PEAK AESTHETIC Component Library
               </h1>
-              <p style={{ color: colors.slate, fontSize: "16px", margin: 0 }}>
-                The building blocks of Peak Rentals
+              <p className="text-peak-slate text-base m-0 font-sans">
+                The building blocks of Peak Rentals - refined mountain lodge aesthetic
               </p>
             </div>
-            
+
             {/* Color Palette */}
-            <section style={{ marginBottom: "48px" }}>
-              <h2 style={{
-                fontFamily: "'Libre Baskerville', serif",
-                fontSize: "20px",
-                marginBottom: "16px"
-              }}>
-                Color Palette
+            <section className="mb-12">
+              <h2 className="font-serif text-xl mb-4 text-peak-charcoal">
+                PEAK Color Palette
               </h2>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
-                {Object.entries(colors).map(([name, value]) => (
-                  <div key={name} style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    background: colors.snow,
-                    padding: "8px 12px",
-                    borderRadius: "8px",
-                    boxShadow: `0 0 0 1px ${colors.stone}`
-                  }}>
-                    <div style={{
-                      width: "24px",
-                      height: "24px",
-                      borderRadius: "4px",
-                      background: value,
-                      border: `1px solid ${colors.stone}`
-                    }} />
-                    <div>
-                      <div style={{ fontSize: "13px", fontWeight: 500 }}>{name}</div>
-                      <div style={{ fontSize: "11px", color: colors.slate, fontFamily: "monospace" }}>{value}</div>
+              <p className="font-sans text-sm text-peak-slate mb-4">
+                All colors available as Tailwind classes: <code className="bg-stone-100 px-1.5 py-0.5 rounded text-xs">bg-peak-[color]-[shade]</code>
+              </p>
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
+                {Object.entries(peakColors).map(([key, color]) => (
+                  <div key={key} className="bg-peak-snow rounded-lg p-4 shadow-peak-card">
+                    <div className="flex items-start gap-3">
+                      <div
+                        className="w-16 h-16 rounded-lg border border-stone-200 shadow-inner flex-shrink-0"
+                        style={{ background: color.hex }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-serif font-medium text-peak-charcoal">{color.name}</div>
+                        <div className="font-sans text-xs text-peak-brass-600 font-medium uppercase tracking-wide">{color.role}</div>
+                        <div className="font-mono text-xs text-peak-slate mt-1">{color.hex}</div>
+                        <code className="inline-block mt-1 text-[10px] bg-peak-forest-50 text-peak-forest-600 px-1.5 py-0.5 rounded">
+                          {color.tailwind}
+                        </code>
+                      </div>
                     </div>
+                    <p className="font-sans text-xs text-peak-slate mt-2 mb-0">
+                      {color.usage}
+                    </p>
                   </div>
                 ))}
               </div>
             </section>
-            
+
             {/* Buttons */}
-            <section style={{ marginBottom: "48px" }}>
-              <h2 style={{
-                fontFamily: "'Libre Baskerville', serif",
-                fontSize: "20px",
-                marginBottom: "16px"
-              }}>
+            <section className="mb-12">
+              <h2 className="font-serif text-xl mb-4 text-peak-charcoal">
                 Buttons
               </h2>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "16px", alignItems: "center" }}>
-                <PeakButton variant="primary">Primary Action</PeakButton>
-                <PeakButton variant="secondary">Secondary</PeakButton>
+              <p className="font-sans text-sm text-peak-slate mb-4">
+                Use CSS classes <code className="bg-stone-100 px-1.5 py-0.5 rounded text-xs">.btn-primary</code>, <code className="bg-stone-100 px-1.5 py-0.5 rounded text-xs">.btn-secondary</code>, or Tailwind equivalents
+              </p>
+              <div className="flex flex-wrap gap-4 items-center">
+                <PeakButton variant="primary">Primary (Forest)</PeakButton>
+                <PeakButton variant="secondary">Secondary (Burgundy)</PeakButton>
+                <PeakButton variant="accent">Accent (Brass)</PeakButton>
                 <PeakButton variant="outline">Outline</PeakButton>
                 <PeakButton variant="ghost">Ghost</PeakButton>
               </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "16px", alignItems: "center", marginTop: "16px" }}>
+              <div className="flex flex-wrap gap-4 items-center mt-4">
                 <PeakButton size="sm">Small</PeakButton>
                 <PeakButton size="md">Medium</PeakButton>
                 <PeakButton size="lg">Large</PeakButton>
               </div>
             </section>
-            
+
             {/* Typography */}
-            <section style={{ marginBottom: "48px" }}>
-              <h2 style={{
-                fontFamily: "'Libre Baskerville', serif",
-                fontSize: "20px",
-                marginBottom: "16px"
-              }}>
+            <section className="mb-12">
+              <h2 className="font-serif text-xl mb-4 text-peak-charcoal">
                 Typography
               </h2>
-              <div style={{
-                background: colors.snow,
-                borderRadius: "10px",
-                padding: "24px",
-                boxShadow: `0 0 0 1px ${colors.wood}15`
-              }}>
-                <div style={{
-                  fontFamily: "'Libre Baskerville', serif",
-                  fontSize: "40px",
-                  fontWeight: 700,
-                  lineHeight: 1.2,
-                  marginBottom: "16px"
-                }}>
+              <p className="font-sans text-sm text-peak-slate mb-4">
+                Use <code className="bg-stone-100 px-1.5 py-0.5 rounded text-xs">font-serif</code> for headings (Libre Baskerville), <code className="bg-stone-100 px-1.5 py-0.5 rounded text-xs">font-sans</code> for body (Inter)
+              </p>
+              <div className="bg-peak-snow rounded-[10px] p-6 shadow-peak-card">
+                <div className="font-serif text-[40px] font-bold leading-tight mb-4 text-peak-charcoal">
                   Heading 1 — Libre Baskerville
                 </div>
-                <div style={{
-                  fontFamily: "'Libre Baskerville', serif",
-                  fontSize: "30px",
-                  fontWeight: 700,
-                  lineHeight: 1.3,
-                  marginBottom: "16px"
-                }}>
+                <div className="font-serif text-[30px] font-bold leading-snug mb-4 text-peak-charcoal">
                   Heading 2 — Sophisticated
                 </div>
-                <div style={{
-                  fontFamily: "'Libre Baskerville', serif",
-                  fontSize: "24px",
-                  lineHeight: 1.4,
-                  marginBottom: "16px"
-                }}>
+                <div className="font-serif text-2xl leading-normal mb-4 text-peak-charcoal">
                   Heading 3 — Elegant
                 </div>
-                <p style={{
-                  fontFamily: "'Inter', system-ui, sans-serif",
-                  fontSize: "16px",
-                  lineHeight: 1.7,
-                  color: colors.charcoal,
-                  marginBottom: "12px"
-                }}>
+                <p className="font-sans text-base leading-relaxed text-peak-charcoal mb-3">
                   Body text uses Inter — clean, readable, and modern. This is the primary font for all content, descriptions, and interface elements. It pairs beautifully with Libre Baskerville for headings.
                 </p>
-                <p style={{
-                  fontFamily: "'Inter', system-ui, sans-serif",
-                  fontSize: "14px",
-                  lineHeight: 1.6,
-                  color: colors.slate
-                }}>
+                <p className="font-sans text-sm leading-relaxed text-peak-slate">
                   Smaller body text for secondary information, meta details, and supporting content.
                 </p>
-                <div style={{
-                  marginTop: "16px",
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: "13px",
-                  color: colors.slate,
-                  background: `${colors.stone}50`,
-                  padding: "12px",
-                  borderRadius: "6px"
-                }}>
+                <div className="mt-4 font-mono text-[13px] text-peak-slate bg-stone-100 p-3 rounded-md">
                   Monospace for specs: capacity_lbs: 10000, lift_height_ft: 53.17
                 </div>
               </div>
             </section>
-            
-            {/* Wood Accent */}
-            <section>
-              <h2 style={{
-                fontFamily: "'Libre Baskerville', serif",
-                fontSize: "20px",
-                marginBottom: "16px"
-              }}>
-                Wood Accent Bar
+
+            {/* Shadows */}
+            <section className="mb-12">
+              <h2 className="font-serif text-xl mb-4 text-peak-charcoal">
+                Shadow Classes
               </h2>
-              <div style={{
-                background: colors.snow,
-                borderRadius: "10px",
-                padding: "24px",
-                boxShadow: `0 0 0 1px ${colors.wood}15`
-              }}>
-                <div style={{
-                  height: "4px",
-                  borderRadius: "2px",
-                  background: `linear-gradient(90deg, ${colors.woodLight}, ${colors.wood}, ${colors.woodDark})`,
-                  marginBottom: "16px"
-                }} />
-                <p style={{ fontSize: "14px", color: colors.slate, margin: 0 }}>
-                  The wood accent bar is a signature element — a subtle gradient that adds warmth and grounds the design in the ski chalet aesthetic.
+              <p className="font-sans text-sm text-peak-slate mb-4">
+                Custom shadow utilities for depth and elevation
+              </p>
+              <div className="grid grid-cols-3 gap-6">
+                <div className="bg-peak-snow rounded-lg p-6 shadow-peak-card">
+                  <div className="font-serif text-lg mb-2">shadow-peak-card</div>
+                  <code className="font-mono text-xs text-peak-slate">Subtle card elevation</code>
+                </div>
+                <div className="bg-peak-snow rounded-lg p-6 shadow-peak-frame">
+                  <div className="font-serif text-lg mb-2">shadow-peak-frame</div>
+                  <code className="font-mono text-xs text-peak-slate">Framed object look</code>
+                </div>
+                <div className="bg-peak-snow rounded-lg p-6 shadow-peak-lift">
+                  <div className="font-serif text-lg mb-2">shadow-peak-lift</div>
+                  <code className="font-mono text-xs text-peak-slate">Hover/lifted state</code>
+                </div>
+              </div>
+            </section>
+
+            {/* Utility Classes */}
+            <section className="mb-12">
+              <h2 className="font-serif text-xl mb-4 text-peak-charcoal">
+                PEAK Utility Classes
+              </h2>
+              <p className="font-sans text-sm text-peak-slate mb-4">
+                Specialized utilities for the mountain lodge aesthetic
+              </p>
+              <div className="grid grid-cols-2 gap-6">
+                {/* Peak Frame */}
+                <div className="bg-peak-snow rounded-lg p-6 shadow-peak-card">
+                  <h3 className="font-serif text-lg mb-3 text-peak-charcoal">.peak-frame</h3>
+                  <div className="peak-frame p-4 bg-peak-cream">
+                    <p className="font-sans text-sm text-peak-charcoal m-0">
+                      Framed content with decorative border treatment, like art in a ski lodge.
+                    </p>
+                  </div>
+                  <code className="inline-block mt-3 font-mono text-xs text-peak-slate bg-stone-100 px-2 py-1 rounded">
+                    class="peak-frame"
+                  </code>
+                </div>
+
+                {/* Peak Wood Accent */}
+                <div className="bg-peak-snow rounded-lg p-6 shadow-peak-card">
+                  <h3 className="font-serif text-lg mb-3 text-peak-charcoal">.peak-wood-accent</h3>
+                  <div className="peak-wood-accent h-1 w-24 rounded mb-3" />
+                  <p className="font-sans text-sm text-peak-slate mb-3">
+                    The signature wood grain gradient bar - adds warmth and grounds the design.
+                  </p>
+                  <code className="inline-block font-mono text-xs text-peak-slate bg-stone-100 px-2 py-1 rounded">
+                    class="peak-wood-accent"
+                  </code>
+                </div>
+
+                {/* Hover Lift */}
+                <div className="bg-peak-snow rounded-lg p-6 shadow-peak-card">
+                  <h3 className="font-serif text-lg mb-3 text-peak-charcoal">.hover-lift</h3>
+                  <div className="hover-lift bg-peak-forest-100 text-peak-forest-600 p-4 rounded-lg cursor-pointer transition-all">
+                    <p className="font-sans text-sm m-0">Hover over me to see the lift effect</p>
+                  </div>
+                  <code className="inline-block mt-3 font-mono text-xs text-peak-slate bg-stone-100 px-2 py-1 rounded">
+                    class="hover-lift"
+                  </code>
+                </div>
+
+                {/* Card Equipment */}
+                <div className="bg-peak-snow rounded-lg p-6 shadow-peak-card">
+                  <h3 className="font-serif text-lg mb-3 text-peak-charcoal">.card-equipment</h3>
+                  <div className="card-equipment bg-peak-snow p-4">
+                    <div className="font-serif text-base text-peak-charcoal">Equipment Card</div>
+                    <p className="font-sans text-sm text-peak-slate mt-1 mb-0">
+                      With brass left border accent
+                    </p>
+                  </div>
+                  <code className="inline-block mt-3 font-mono text-xs text-peak-slate bg-stone-100 px-2 py-1 rounded">
+                    class="card-equipment"
+                  </code>
+                </div>
+              </div>
+            </section>
+
+            {/* Wood Accent - Legacy */}
+            <section>
+              <h2 className="font-serif text-xl mb-4 text-peak-charcoal">
+                Decorative Elements
+              </h2>
+              <div className="bg-peak-snow rounded-[10px] p-6 shadow-peak-card">
+                <div className="peak-wood-accent h-1 rounded mb-4" />
+                <p className="font-sans text-sm text-peak-slate m-0">
+                  The wood accent bar is a signature element — a subtle gradient from light wood through brass to dark wood that adds warmth and grounds the design in the ski chalet aesthetic.
                 </p>
+                <div className="mt-4 p-4 bg-peak-cream rounded-lg border-l-4 border-peak-brass-500">
+                  <p className="font-sans text-sm text-peak-charcoal m-0">
+                    <strong>Tip:</strong> Use the brass left border (<code className="text-xs bg-white px-1 py-0.5 rounded">border-l-4 border-peak-brass-500</code>) on cards to add the signature PEAK accent.
+                  </p>
+                </div>
               </div>
             </section>
           </div>
