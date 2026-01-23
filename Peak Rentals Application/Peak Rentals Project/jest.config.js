@@ -8,6 +8,9 @@ const createJestConfig = nextJest({
 // Add any custom config to be passed to Jest
 /** @type {import('jest').Config} */
 const customJestConfig = {
+  // Setup files that run BEFORE module imports (for Web API polyfills)
+  setupFiles: ['<rootDir>/jest.setup.globals.ts'],
+  // Setup files that run AFTER environment is set up (for mocks, etc.)
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   testEnvironment: 'jest-environment-jsdom',
   moduleNameMapper: {

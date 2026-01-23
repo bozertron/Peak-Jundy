@@ -1,38 +1,50 @@
 import '@testing-library/jest-dom';
 
-// Polyfill Web APIs for API route testing
-// These are needed because Next.js API routes use Web APIs (Request, Response, Headers, etc.)
-// Node 18+ has native fetch, but jsdom environment may not expose them
-import { TextEncoder, TextDecoder } from 'util';
-
-// Add TextEncoder/TextDecoder if not present
-if (typeof global.TextEncoder === 'undefined') {
-  global.TextEncoder = TextEncoder;
-}
-if (typeof global.TextDecoder === 'undefined') {
-  global.TextDecoder = TextDecoder as typeof global.TextDecoder;
-}
-
-// Expose native Node.js fetch APIs globally for API route testing
-// These are available in Node 18+ but may not be exposed in all test environments
-const { fetch, Request, Response, Headers } = globalThis;
-if (typeof global.fetch === 'undefined' && fetch) {
-  global.fetch = fetch;
-}
-if (typeof global.Request === 'undefined' && Request) {
-  global.Request = Request;
-}
-if (typeof global.Response === 'undefined' && Response) {
-  global.Response = Response;
-}
-if (typeof global.Headers === 'undefined' && Headers) {
-  global.Headers = Headers;
-}
+// Note: Web API polyfills (fetch, Request, Response, etc.) are set up in jest.setup.globals.ts
+// which runs BEFORE module imports to ensure Next.js API routes can be tested
 
 // Mock next-auth for testing
 jest.mock('next-auth', () => ({
   getServerSession: jest.fn(),
 }));
+
+// Mock @/lib/auth to avoid loading nodemailer and other auth dependencies
+jest.mock('@/lib/auth', () => ({
+  authOptions: {},
+}));
+
+// Mock next/server's NextResponse for API route testing
+// This avoids issues with Response not being defined in the test environment
+jest.mock('next/server', () => {
+  return {
+    NextResponse: {
+      json: (body: unknown, init?: ResponseInit) => {
+        const response = new Response(JSON.stringify(body), {
+          ...init,
+          headers: {
+            'Content-Type': 'application/json',
+            ...(init?.headers || {}),
+          },
+        });
+        return response;
+      },
+      redirect: (url: string | URL, status?: number) => {
+        return new Response(null, {
+          status: status || 307,
+          headers: { Location: typeof url === 'string' ? url : url.toString() },
+        });
+      },
+      next: () => new Response(null),
+      rewrite: (url: string | URL) => {
+        return new Response(null, {
+          headers: {
+            'x-middleware-rewrite': typeof url === 'string' ? url : url.toString(),
+          },
+        });
+      },
+    },
+  };
+});
 
 // Mock next/navigation for testing
 jest.mock('next/navigation', () => ({

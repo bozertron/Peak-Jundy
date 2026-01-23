@@ -1,4 +1,8 @@
 /**
+ * @jest-environment node
+ */
+
+/**
  * Comprehensive unit tests for /api/cards route
  * Tests GET endpoint for retrieving user's collected contact cards
  */

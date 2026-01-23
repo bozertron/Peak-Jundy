@@ -1,4 +1,8 @@
 /**
+ * @jest-environment node
+ */
+
+/**
  * Comprehensive unit tests for /api/conversations route
  * Tests GET (list conversations) and POST (create conversation) endpoints
  */
@@ -167,7 +171,10 @@ describe('/api/conversations', () => {
         const response = await GET();
         const data = await response.json();
 
-        expect(data.conversations[0].lastMessage).toEqual(lastMessage);
+        // Dates are serialized to ISO strings in JSON response
+        expect(data.conversations[0].lastMessage.content).toBe('Hello there!');
+        expect(data.conversations[0].lastMessage.senderId).toBe('participant-456');
+        expect(data.conversations[0].lastMessage.createdAt).toBe('2024-01-01T12:00:00.000Z');
       });
 
       it('should return null for lastMessage when no messages exist', async () => {
