@@ -1,8 +1,0 @@
-# Context ignore - files to exclude from AI context/analysis
-# These files are preserved for historical reference but should not clutter context
-
-# Wasteland - obsolete/archived files
-_wasteland/
-
-# Original reference files
-OGREF/
