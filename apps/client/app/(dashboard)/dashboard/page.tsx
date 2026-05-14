@@ -197,6 +197,12 @@ export default async function DashboardHome() {
             body="Your collected network."
           />
           <QuickLink
+            href="/peaks"
+            emoji="⛰️"
+            title="Peaks + treasure"
+            body="Earned, claimed, what's up next."
+          />
+          <QuickLink
             href="/owner/create-listing"
             emoji="🛠️"
             title="List equipment"

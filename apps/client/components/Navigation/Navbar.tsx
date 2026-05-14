@@ -28,6 +28,9 @@ export default function Navbar({ session }: { session: Session | null }) {
                 <Link className="hover:text-peak-charcoal transition-colors" href="/cards">
                   Cards
                 </Link>
+                <Link className="hover:text-peak-charcoal transition-colors" href="/peaks">
+                  Peaks
+                </Link>
                 <Link className="hover:text-peak-charcoal transition-colors" href="/dashboard">
                   Dashboard
                 </Link>

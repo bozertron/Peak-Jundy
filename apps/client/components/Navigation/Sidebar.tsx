@@ -58,6 +58,7 @@ export default function Sidebar({ userRole }: { userRole: string }) {
         <NavItem href="/map" label="Map" />
         <NavItem href="/network" label="Trust network" />
         <NavItem href="/cards" label="Contact cards" />
+        <NavItem href="/peaks" label="Peaks · treasure" />
       </div>
 
       {isOwner && (

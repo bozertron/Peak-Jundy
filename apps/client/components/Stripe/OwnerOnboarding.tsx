@@ -11,28 +11,55 @@ export default function OwnerOnboarding() {
     setLoading(true);
     try {
       const res = await fetch("/api/stripe/connect", { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Failed to start onboarding");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok)
+        throw new Error(
+          data?.error || "Couldn't start onboarding. Try again."
+        );
+      if (!data.url) {
+        throw new Error("Onboarding URL missing from response.");
+      }
       window.location.href = data.url;
     } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : "Error";
-      setError(message);
+      console.error("[onboarding]", e);
+      setError(e instanceof Error ? e.message : "Onboarding failed to start.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="bg-white border rounded-lg p-6 space-y-4">
-      <h2 className="text-xl font-semibold">Get Paid with Stripe Connect</h2>
-      <p className="text-gray-600">
-        To list equipment and receive payouts, complete Stripe onboarding.
+    <div className="peak-frame bg-white rounded-peak p-6 space-y-4">
+      <div>
+        <p className="font-mono uppercase tracking-[0.2em] text-xs text-peak-slate mb-1">
+          Stripe Connect
+        </p>
+        <h2 className="font-serif text-xl font-bold text-peak-charcoal">
+          Get paid for the gear you list
+        </h2>
+      </div>
+      <p className="text-peak-charcoal/70">
+        Stripe handles the actual money. Peak takes a 10% platform fee on each
+        completed rental; everything else goes straight to your Connect
+        account. Onboarding is five minutes.
       </p>
 
-      {error && <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm">{error}</div>}
+      {error && (
+        <div
+          className="rounded-peak bg-peak-burgundy/5 border border-peak-burgundy/30 text-peak-burgundy p-3 text-sm"
+          role="alert"
+        >
+          {error}
+        </div>
+      )}
 
-      <button className="btn-primary disabled:opacity-50" disabled={loading} onClick={start}>
-        {loading ? "Opening..." : "Start Stripe Onboarding"}
+      <button
+        type="button"
+        onClick={start}
+        disabled={loading}
+        className="px-5 py-2.5 rounded-peak bg-peak-forest text-white font-medium hover:bg-peak-forest/90 disabled:opacity-50 transition-colors"
+      >
+        {loading ? "Opening Stripe…" : "Start Stripe onboarding"}
       </button>
     </div>
   );

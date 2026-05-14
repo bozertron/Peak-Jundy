@@ -166,18 +166,19 @@ async function main() {
   // -----------------------------------------------------------------------
   // Peaks transactions + balances — reflect founding bonuses and vouches
   // -----------------------------------------------------------------------
+  // Canonical reasons per lib/peaks.ts PeaksTransactionReason.
   const peaksLedger = [
-    { userId: admin.id,    amount: 500, reason: "founding_member" },
-    { userId: owner.id,    amount: 500, reason: "founding_member" },
+    { userId: admin.id,    amount: 500, reason: "founding_bonus" },
+    { userId: owner.id,    amount: 500, reason: "founding_bonus" },
     { userId: admin.id,    amount: 5,   reason: "vouch_given" },
     { userId: admin.id,    amount: 5,   reason: "vouch_given" },
     { userId: owner.id,    amount: 5,   reason: "vouch_given" },
-    { userId: owner.id,    amount: 10,  reason: "vouch_broadcast" },
-    { userId: ownerTwo.id, amount: 10,  reason: "vouch_broadcast" },
-    { userId: renter1.id,  amount: 10,  reason: "vouch_broadcast" },
-    { userId: renter1.id,  amount: 5,   reason: "vouch_given" },
     { userId: ownerTwo.id, amount: 5,   reason: "vouch_given" },
+    { userId: renter1.id,  amount: 5,   reason: "vouch_given" },
     { userId: renter2.id,  amount: 3,   reason: "first_interaction" },
+    { userId: admin.id,    amount: 15,  reason: "profile_complete" },
+    { userId: owner.id,    amount: 15,  reason: "profile_complete" },
+    { userId: ownerTwo.id, amount: 15,  reason: "profile_complete" },
   ];
 
   for (const tx of peaksLedger) {

@@ -6,122 +6,184 @@ import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import { redirect } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
+const STATUS_STYLES: Record<string, { label: string; bg: string; color: string }> = {
+  PENDING: { label: "Pending", bg: "bg-peak-brass/15", color: "text-peak-brass" },
+  CONFIRMED: { label: "Confirmed", bg: "bg-peak-forest/15", color: "text-peak-forest" },
+  COMPLETED: { label: "Completed", bg: "bg-peak-navy/15", color: "text-peak-navy" },
+  CANCELLED: { label: "Cancelled", bg: "bg-peak-burgundy/15", color: "text-peak-burgundy" },
+};
+
+function fmt(d: Date) {
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
 export default async function OwnerDashboardPage() {
   const session = await getServerSession(authOptions);
-  if (!session) redirect("/auth/signin");
+  if (!session?.user?.id) redirect("/auth/signin");
   const userId = session.user.id;
-  const isOwner = session.user.role === "OWNER" || session.user.role === "ADMIN";
+  const isOwner =
+    session.user.role === "OWNER" || session.user.role === "ADMIN";
 
   if (!isOwner) {
     return (
-      <div className="max-w-2xl space-y-6">
-        <div className="bg-white border rounded-lg p-6">
-          <h1 className="text-2xl font-bold">Owner Dashboard</h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Complete Stripe onboarding to unlock owner tools.
-          </p>
-          <div className="mt-4">
-            <Link className="btn-primary" href="/owner/onboarding">
-              Start Stripe Onboarding
-            </Link>
-          </div>
-        </div>
+      <div className="peak-frame bg-white rounded-peak p-6">
+        <p className="font-mono uppercase tracking-[0.2em] text-xs text-peak-slate mb-2">
+          Owner dashboard
+        </p>
+        <h1 className="font-serif text-2xl font-bold text-peak-charcoal mb-3">
+          Get set up to get paid.
+        </h1>
+        <p className="text-peak-charcoal/70 mb-5">
+          Owner tools unlock once you&rsquo;ve completed Stripe Connect onboarding.
+        </p>
+        <Link
+          href="/owner/onboarding"
+          className="inline-block px-5 py-2.5 rounded-peak bg-peak-forest text-white font-medium hover:bg-peak-forest/90 transition-colors"
+        >
+          Start onboarding
+        </Link>
       </div>
     );
   }
 
-  const [equipmentCount, bookingCount, revenue, recentBookings] = await Promise.all([
-    prisma.equipment.count({ where: { ownerId: userId } }),
-    prisma.booking.count({ where: { equipment: { ownerId: userId } } }),
-    prisma.booking.aggregate({
-      where: { equipment: { ownerId: userId }, status: "CONFIRMED" },
-      _sum: { totalPrice: true },
-    }),
-    prisma.booking.findMany({
-      where: { equipment: { ownerId: userId } },
-      include: { equipment: true, renter: true },
-      orderBy: { createdAt: "desc" },
-      take: 10,
-    }),
-  ]);
+  const [equipmentCount, bookingCount, revenue, activeRentals, recentBookings] =
+    await Promise.all([
+      prisma.equipment.count({ where: { ownerId: userId } }),
+      prisma.booking.count({ where: { equipment: { ownerId: userId } } }),
+      prisma.booking.aggregate({
+        where: { equipment: { ownerId: userId }, status: "CONFIRMED" },
+        _sum: { totalPrice: true },
+      }),
+      prisma.booking.count({
+        where: {
+          equipment: { ownerId: userId },
+          status: { in: ["PENDING", "CONFIRMED"] },
+        },
+      }),
+      prisma.booking.findMany({
+        where: { equipment: { ownerId: userId } },
+        include: {
+          equipment: { select: { id: true, title: true } },
+          renter: { select: { name: true, email: true } },
+        },
+        orderBy: { createdAt: "desc" },
+        take: 8,
+      }),
+    ]);
+
+  const revenueCents = revenue._sum.totalPrice ?? 0;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between bg-white border rounded-lg p-6">
+      <div className="peak-frame bg-white rounded-peak p-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Owner Dashboard</h1>
-          <p className="text-sm text-gray-600 mt-1">Payout status + listing performance.</p>
+          <p className="font-mono uppercase tracking-[0.2em] text-xs text-peak-slate mb-2">
+            Owner dashboard
+          </p>
+          <h1 className="font-serif text-2xl font-bold text-peak-charcoal">
+            How the shop&rsquo;s doing
+          </h1>
         </div>
-        <Link className="btn-primary" href="/owner/create-listing">Create Listing</Link>
+        <Link
+          href="/owner/create-listing"
+          className="px-5 py-2.5 rounded-peak bg-peak-forest text-white font-medium hover:bg-peak-forest/90 transition-colors"
+        >
+          + New listing
+        </Link>
       </div>
 
       <PaymentStatus />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white border rounded-lg p-6">
-          <div className="text-sm text-gray-600">Listings</div>
-          <div className="text-3xl font-bold">{equipmentCount}</div>
-        </div>
-        <div className="bg-white border rounded-lg p-6">
-          <div className="text-sm text-gray-600">Bookings</div>
-          <div className="text-3xl font-bold">{bookingCount}</div>
-        </div>
-        <div className="bg-white border rounded-lg p-6">
-          <div className="text-sm text-gray-600">Revenue (confirmed)</div>
-          <div className="text-3xl font-bold">{formatCurrency(revenue._sum.totalPrice ?? 0)}</div>
-        </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <Stat label="Listings" value={String(equipmentCount)} />
+        <Stat label="Active rentals" value={String(activeRentals)} />
+        <Stat label="All-time bookings" value={String(bookingCount)} />
+        <Stat
+          label="Confirmed revenue"
+          value={formatCurrency(revenueCents)}
+          accent
+        />
       </div>
 
-      <div className="bg-white border rounded-lg p-6">
-        <h2 className="text-lg font-semibold mb-2">Next steps</h2>
-        <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
-          <li>Complete Stripe onboarding if payouts are not enabled.</li>
-          <li>Keep listings up to date with accurate specs and pricing.</li>
-          <li>Review unfulfilled searches (admin) to spot demand.</li>
-        </ul>
-      </div>
-
-      <div className="bg-white border rounded-lg overflow-hidden">
-        <div className="px-6 py-4 border-b">
-          <h2 className="text-lg font-semibold">Recent Bookings</h2>
-          <p className="text-sm text-gray-600">Latest rentals for your equipment.</p>
+      <div className="peak-frame bg-white rounded-peak overflow-hidden">
+        <div className="px-5 py-4 border-b border-peak-charcoal/10">
+          <p className="font-mono uppercase tracking-[0.2em] text-xs text-peak-slate mb-1">
+            Recent activity
+          </p>
+          <h2 className="font-serif text-lg font-bold text-peak-charcoal">
+            Latest rentals on your gear
+          </h2>
         </div>
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Equipment</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Renter</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dates</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {recentBookings.map((booking) => (
-              <tr key={booking.id} className="hover:bg-gray-50">
-                <td className="px-6 py-3 text-sm text-gray-900">{booking.equipment.title}</td>
-                <td className="px-6 py-3 text-sm text-gray-700">
-                  {booking.renter.email ?? "Unknown"}
-                </td>
-                <td className="px-6 py-3 text-sm text-gray-700">
-                  {booking.startDate.toDateString()} to {booking.endDate.toDateString()}
-                </td>
-                <td className="px-6 py-3 text-sm text-gray-700">
-                  {formatCurrency(booking.totalPrice)}
-                </td>
-                <td className="px-6 py-3 text-sm text-gray-700">{booking.status}</td>
-              </tr>
-            ))}
-            {!recentBookings.length && (
-              <tr>
-                <td className="px-6 py-6 text-sm text-gray-600" colSpan={5}>
-                  No bookings yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        {recentBookings.length === 0 ? (
+          <div className="p-8 text-center">
+            <div className="text-4xl mb-3" aria-hidden>
+              🪧
+            </div>
+            <p className="text-peak-charcoal/70 text-sm">
+              Nothing rented out yet. The catalog is live — give it time.
+            </p>
+          </div>
+        ) : (
+          <ul className="divide-y divide-peak-charcoal/10">
+            {recentBookings.map((b) => {
+              const status = STATUS_STYLES[b.status] ?? STATUS_STYLES.PENDING!;
+              return (
+                <li key={b.id} className="p-4 flex flex-wrap items-center gap-4">
+                  <div className="flex-1 min-w-[220px]">
+                    <Link
+                      href={`/equipment/${b.equipmentId}`}
+                      className="font-medium text-peak-charcoal hover:text-peak-forest transition-colors"
+                    >
+                      {b.equipment.title}
+                    </Link>
+                    <p className="text-xs text-peak-charcoal/60 mt-0.5">
+                      by {b.renter.name ?? b.renter.email ?? "a renter"} ·{" "}
+                      {fmt(b.startDate)} → {fmt(b.endDate)}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium text-peak-charcoal">
+                      {formatCurrency(b.totalPrice)}
+                    </p>
+                  </div>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${status.bg} ${status.color}`}
+                  >
+                    {status.label}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
+    </div>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  accent = false,
+}: {
+  label: string;
+  value: string;
+  accent?: boolean;
+}) {
+  return (
+    <div className="peak-frame bg-white rounded-peak p-4">
+      <p className="font-mono uppercase tracking-[0.15em] text-[10px] text-peak-slate mb-2">
+        {label}
+      </p>
+      <p
+        className={`font-serif text-2xl font-bold ${
+          accent ? "text-peak-forest" : "text-peak-charcoal"
+        }`}
+      >
+        {value}
+      </p>
     </div>
   );
 }

@@ -1,4 +1,15 @@
 import { prisma } from "@/lib/prisma";
+import Link from "next/link";
+
+export const dynamic = "force-dynamic";
+
+function fmtDate(d: Date) {
+  return d.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
 
 export default async function AdminUsersPage() {
   const users = await prisma.user.findMany({
@@ -9,55 +20,107 @@ export default async function AdminUsersPage() {
       email: true,
       role: true,
       createdAt: true,
-      _count: { select: { equipment: true, rentals: true } },
+      peaksBalance: true,
+      foundingMember: true,
+      _count: {
+        select: {
+          equipment: true,
+          rentals: true,
+          vouchesGiven: true,
+          vouchesReceived: true,
+        },
+      },
     },
   });
 
   return (
-    <div className="max-w-6xl space-y-6">
-      <div className="bg-white border rounded-lg p-6">
-        <h1 className="text-2xl font-bold">User Management</h1>
-        <p className="text-sm text-gray-600 mt-1">
-          Review users, roles, and activity levels.
+    <div className="space-y-6">
+      <div className="peak-frame bg-white rounded-peak p-6">
+        <p className="font-mono uppercase tracking-[0.2em] text-xs text-peak-slate mb-2">
+          Admin · users
+        </p>
+        <h1 className="font-serif text-2xl font-bold text-peak-charcoal">
+          Who&rsquo;s on Peak
+        </h1>
+        <p className="text-sm text-peak-charcoal/70 mt-2">
+          {users.length} {users.length === 1 ? "person" : "people"} signed up
+          so far.
         </p>
       </div>
 
-      <div className="bg-white border rounded-lg overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Listings</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rentals</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Joined</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {users.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50">
-                <td className="px-6 py-3 text-sm text-gray-900">
-                  <div className="font-medium">{user.name ?? "Unnamed"}</div>
-                  <div className="text-xs text-gray-500">{user.email ?? "No email"}</div>
-                </td>
-                <td className="px-6 py-3 text-sm text-gray-700">{user.role}</td>
-                <td className="px-6 py-3 text-sm text-gray-700">{user._count.equipment}</td>
-                <td className="px-6 py-3 text-sm text-gray-700">{user._count.rentals}</td>
-                <td className="px-6 py-3 text-sm text-gray-700">
-                  {user.createdAt.toDateString()}
-                </td>
-              </tr>
-            ))}
-            {!users.length && (
+      <div className="peak-frame bg-white rounded-peak overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-peak-cream/50 border-b border-peak-charcoal/10">
               <tr>
-                <td className="px-6 py-6 text-sm text-gray-600" colSpan={5}>
-                  No users found.
-                </td>
+                <Th>User</Th>
+                <Th>Role</Th>
+                <Th>Peaks</Th>
+                <Th>Listings</Th>
+                <Th>Rentals</Th>
+                <Th>Vouches (out / in)</Th>
+                <Th>Joined</Th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-peak-charcoal/5">
+              {users.map((u) => (
+                <tr key={u.id} className="hover:bg-peak-cream/30 transition-colors">
+                  <td className="px-5 py-3">
+                    <Link
+                      href={`/profile/${u.id}`}
+                      className="font-medium text-peak-charcoal hover:text-peak-forest transition-colors"
+                    >
+                      {u.name ?? "Unnamed"}
+                    </Link>
+                    <p className="text-xs text-peak-charcoal/50">
+                      {u.email ?? "no email"}
+                    </p>
+                    {u.foundingMember && (
+                      <span className="inline-block mt-1 text-[10px] font-medium bg-peak-brass/15 text-peak-brass px-1.5 py-0.5 rounded-full">
+                        ⭐ Founder
+                      </span>
+                    )}
+                  </td>
+                  <Td>{u.role}</Td>
+                  <Td>{u.peaksBalance}</Td>
+                  <Td>{u._count.equipment}</Td>
+                  <Td>{u._count.rentals}</Td>
+                  <Td>
+                    {u._count.vouchesGiven} / {u._count.vouchesReceived}
+                  </Td>
+                  <Td>{fmtDate(u.createdAt)}</Td>
+                </tr>
+              ))}
+              {!users.length && (
+                <tr>
+                  <td
+                    className="px-5 py-8 text-sm text-peak-charcoal/60 text-center"
+                    colSpan={7}
+                  >
+                    No users yet. Seed the DB or wait for sign-ups.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
+  );
+}
+
+function Th({ children }: { children: React.ReactNode }) {
+  return (
+    <th className="px-5 py-3 text-left font-mono uppercase tracking-[0.15em] text-[10px] text-peak-slate">
+      {children}
+    </th>
+  );
+}
+
+function Td({ children }: { children: React.ReactNode }) {
+  return (
+    <td className="px-5 py-3 text-sm text-peak-charcoal/80 whitespace-nowrap">
+      {children}
+    </td>
   );
 }
