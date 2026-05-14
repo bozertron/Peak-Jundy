@@ -29,10 +29,7 @@ interface EquipmentFromAPI {
   description: string | null;
   category: string;
   dailyRate: number;
-  pricePerDay?: number;
-  latitude: number | null;
-  longitude: number | null;
-  imageUrl: string | null;
+  image: string | null;
   available: boolean;
   owner: {
     id: string;
@@ -257,7 +254,7 @@ function SelectedEquipmentPanel({ equipment, onClose, onMessage }: SelectedEquip
 // ============================================================================
 
 export default function MapPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
 
   // State
@@ -292,21 +289,27 @@ export default function MapPage() {
 
         const data = await res.json();
 
-        // Transform API response to MapEquipment format
+        // Transform API response to MapEquipment format. Equipment doesn't
+        // carry its own lat/long yet — we use the owner's coordinates as the
+        // pin position (it's the community/wilderness model: items live where
+        // their owners do).
         const mapEquipment: MapEquipment[] = (data.equipment || [])
-          .filter((item: EquipmentFromAPI) => item.latitude && item.longitude)
+          .filter(
+            (item: EquipmentFromAPI) =>
+              item.owner.latitude !== null && item.owner.longitude !== null
+          )
           .map((item: EquipmentFromAPI) => ({
             id: item.id,
             title: item.title,
             category: item.category,
-            dailyRate: item.dailyRate || item.pricePerDay || 0,
-            latitude: item.latitude!,
-            longitude: item.longitude!,
-            imageUrl: item.imageUrl || undefined,
+            dailyRate: item.dailyRate,
+            latitude: item.owner.latitude!,
+            longitude: item.owner.longitude!,
+            imageUrl: item.image ?? undefined,
             available: item.available,
             owner: {
               id: item.owner.id,
-              name: item.owner.name || "Anonymous",
+              name: item.owner.name || "A neighbor",
               avatarUrl: item.owner.avatarUrl || undefined,
               flavor: item.owner.flavor || undefined,
             },
@@ -336,10 +339,39 @@ export default function MapPage() {
     setSelectedEquipment(null);
   }, []);
 
-  const handleMessage = useCallback(() => {
-    if (selectedEquipment) {
-      // Navigate to chat or create conversation
-      router.push(`/chat/new?ownerId=${selectedEquipment.owner.id}&equipmentId=${selectedEquipment.id}`);
+  const handleMessage = useCallback(async () => {
+    if (!selectedEquipment) return;
+
+    try {
+      const res = await fetch("/api/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          participantId: selectedEquipment.owner.id,
+          equipmentId: selectedEquipment.id,
+          initialMessage: `Hey ${
+            selectedEquipment.owner.name?.split(" ")[0] ?? ""
+          } — interested in the ${selectedEquipment.title}.`,
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        if (res.status === 403) {
+          setError(
+            `You aren't in ${selectedEquipment.owner.name}'s network yet. Get a vouch from someone they trust first.`
+          );
+        } else {
+          setError(data?.error || "Couldn't start a conversation. Try again.");
+        }
+        return;
+      }
+
+      router.push(`/chat/${data.conversation.id}`);
+    } catch (err) {
+      console.error("[map] start conversation failed", err);
+      setError("Network hiccup — couldn't start a conversation. Try again.");
     }
   }, [selectedEquipment, router]);
 
@@ -362,54 +394,46 @@ export default function MapPage() {
     return <LoadingState />;
   }
 
+  // No Mapbox token configured — show a polite notice instead of a blank tile area.
+  const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+  if (!mapboxToken) {
+    return (
+      <div className="min-h-screen bg-peak-cream flex items-center justify-center p-6">
+        <div className="peak-frame bg-white rounded-peak p-8 max-w-md text-center">
+          <div className="text-5xl mb-4" aria-hidden>🗺️</div>
+          <h1 className="font-serif text-2xl font-bold text-peak-charcoal mb-3">
+            Map isn&rsquo;t wired up yet
+          </h1>
+          <p className="text-peak-charcoal/70 mb-4">
+            Set <code className="font-mono text-sm bg-peak-cream px-1.5 py-0.5 rounded">NEXT_PUBLIC_MAPBOX_TOKEN</code> in
+            your environment to unlock the map. (Free tier covers v0; sign up at{" "}
+            <a
+              href="https://account.mapbox.com/access-tokens/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-peak-forest underline"
+            >
+              mapbox.com
+            </a>
+            .)
+          </p>
+          <Link
+            href="/browse"
+            className="inline-block mt-2 px-5 py-2.5 rounded-peak bg-peak-forest text-white font-medium hover:bg-peak-forest/90 transition-colors"
+          >
+            Browse equipment instead
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   // ============================================================================
   // MAIN RENDER
   // ============================================================================
 
   return (
-    <div className="h-screen flex flex-col bg-peak-cream">
-      {/* ================================================================== */}
-      {/* HEADER */}
-      {/* ================================================================== */}
-      <header className="bg-peak-snow border-b border-peak-stone px-4 py-3 flex items-center justify-between z-30 flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-2xl group-hover:scale-110 transition-transform">⛰️</span>
-            <h1 className="font-serif text-xl font-bold text-peak-charcoal">
-              Peak
-            </h1>
-          </Link>
-          <span className="text-peak-stone">|</span>
-          <h2 className="font-serif text-lg text-peak-charcoal">
-            Discover
-          </h2>
-        </div>
-
-        <nav className="flex items-center gap-4">
-          <Link
-            href="/browse"
-            className="text-sm text-peak-slate hover:text-peak-charcoal transition-colors"
-          >
-            Browse
-          </Link>
-          <Link
-            href="/network"
-            className="text-sm text-peak-slate hover:text-peak-charcoal transition-colors"
-          >
-            Network
-          </Link>
-          <Link
-            href="/dashboard"
-            className="text-sm text-peak-slate hover:text-peak-charcoal transition-colors"
-          >
-            Dashboard
-          </Link>
-          <div className="w-8 h-8 rounded-full bg-peak-forest text-white flex items-center justify-center text-sm font-medium shadow-sm">
-            {session?.user?.name?.[0]?.toUpperCase() || "U"}
-          </div>
-        </nav>
-      </header>
-
+    <div className="h-[calc(100vh-4rem)] flex flex-col bg-peak-cream">
       {/* ================================================================== */}
       {/* CATEGORY FILTER BAR */}
       {/* ================================================================== */}

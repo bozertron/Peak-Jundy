@@ -14,7 +14,8 @@ interface ParticipantInfo {
   id: string;
   name: string | null;
   avatarUrl: string | null;
-  email: string | null;
+  flavor: string | null;
+  locationName: string | null;
 }
 
 interface MessageInfo {
@@ -80,7 +81,8 @@ export async function GET(
             id: true,
             name: true,
             avatarUrl: true,
-            email: true,
+            flavor: true,
+            locationName: true,
           },
         },
         equipment: {
@@ -107,7 +109,8 @@ export async function GET(
                 id: true,
                 name: true,
                 avatarUrl: true,
-                email: true,
+                flavor: true,
+                locationName: true,
               },
             },
           },

@@ -32,8 +32,8 @@ export default async function HomePage() {
             Equipment rental, the way mountain communities already trust each other.
           </h1>
           <p className="text-lg md:text-xl text-peak-charcoal/70 max-w-2xl mx-auto mb-10">
-            Vouch-gated peer-to-peer rental for the people you'd already lend
-            your tools to. Built around trust, made for the kind of gear that's
+            Vouch-gated peer-to-peer rental for the people you&rsquo;d already lend
+            your tools to. Built around trust, made for the kind of gear that&rsquo;s
             too valuable to hand to a stranger.
           </p>
 

@@ -22,6 +22,9 @@ export async function GET() {
           flavor: true,
           memberSince: true,
           foundingMember: true,
+          locationName: true,
+          latitude: true,
+          longitude: true,
           _count: {
             select: { equipment: true }
           }

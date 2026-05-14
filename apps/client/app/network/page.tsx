@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
-import { PeakCard } from "@/components/ui/PeakCard";
-import { PeakButton } from "@/components/ui/PeakButton";
-import { PeakInput } from "@/components/ui/PeakInput";
+import { PeakCard } from "@/components/ui/peak-card";
+import { PeakButton } from "@/components/ui/peak-button";
+import { PeakInput } from "@/components/ui/peak-input";
 
 interface NetworkMember {
   id: string;

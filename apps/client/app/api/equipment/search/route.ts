@@ -111,7 +111,7 @@ export async function POST(req: Request) {
             ],
           },
           ...(category
-            ? [{ category: { equals: category, mode: "insensitive" } }]
+            ? [{ category: { equals: category, mode: "insensitive" as const } }]
             : []),
         ],
       },

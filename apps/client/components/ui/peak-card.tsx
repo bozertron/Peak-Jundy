@@ -6,11 +6,20 @@ import { forwardRef, createContext, useContext, HTMLAttributes, ReactNode } from
 // TYPES
 // ============================================================================
 
-export type PeakCardVariant = "default" | "equipment" | "stats" | "framed";
+export type PeakCardVariant =
+  | "default"   // White-stone surface, soft Peak shadow
+  | "equipment" // Brass left-stripe accent for marketplace items
+  | "stats"     // Subtle forest gradient wash for metrics
+  | "framed"    // Wood-tone border + frame shadow ("art on the wall")
+  | "elevated"; // Synonym of framed; emphasizes lift over surface
+
+export type PeakCardPadding = "none" | "sm" | "md" | "lg";
 
 export interface PeakCardProps extends HTMLAttributes<HTMLDivElement> {
   /** Card style variant */
   variant?: PeakCardVariant;
+  /** Internal padding around children */
+  padding?: PeakCardPadding;
   /** Enable hover lift animation effect */
   hoverLift?: boolean;
   /** Show wood accent bar at top of card */
@@ -92,6 +101,12 @@ const variantStyles: Record<PeakCardVariant, string> = {
     "bg-gradient-to-br from-peak-snow to-peak-forest/5"
   ),
   framed: cn(
+    "bg-peak-snow",
+    "border border-peak-wood/10",
+    "shadow-peak-frame"
+  ),
+  // Same wood-frame styling as `framed`; alias for code that calls it `elevated`.
+  elevated: cn(
     "bg-peak-snow",
     "border border-peak-wood/10",
     "shadow-peak-frame"
@@ -207,10 +222,18 @@ PeakCardFooter.displayName = "PeakCard.Footer";
  * </PeakCard>
  * ```
  */
+const paddingStyles: Record<PeakCardPadding, string> = {
+  none: "p-0",
+  sm: "p-3",
+  md: "p-5",
+  lg: "p-8",
+};
+
 const PeakCardRoot = forwardRef<HTMLDivElement, PeakCardProps>(
   (
     {
       variant = "default",
+      padding = "md",
       hoverLift = false,
       woodAccent = false,
       className,
@@ -247,7 +270,7 @@ const PeakCardRoot = forwardRef<HTMLDivElement, PeakCardProps>(
           )}
 
           {/* Card content with padding */}
-          <div className="p-5">
+          <div className={paddingStyles[padding]}>
             {children}
           </div>
         </div>

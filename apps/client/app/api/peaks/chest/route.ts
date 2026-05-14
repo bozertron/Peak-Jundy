@@ -116,12 +116,13 @@ export async function POST(request: Request) {
     }),
   ]);
 
-  // Parse prize value
-  let prize;
+  // Parse prize value (it's a string description by default, JSON if structured)
+  let prize: unknown;
+  const rawPrizeValue = updatedChest.prizeValue ?? "";
   try {
-    prize = JSON.parse(updatedChest.prizeValue);
+    prize = JSON.parse(rawPrizeValue);
   } catch {
-    prize = { description: updatedChest.prizeValue };
+    prize = { description: rawPrizeValue };
   }
 
   return NextResponse.json({

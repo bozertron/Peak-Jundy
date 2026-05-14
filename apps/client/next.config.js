@@ -9,14 +9,6 @@ const nextConfig = {
       { protocol: "https", hostname: "*.stripe.com" },
     ],
   },
-  // TODO(peak): Tighten these once we sweep the legacy TS debt in apps/client.
-  // The v0 ship-priority is functional correctness; type-level cleanup follows.
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
 };
 
 module.exports = nextConfig;

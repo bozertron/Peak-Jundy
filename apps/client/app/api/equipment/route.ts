@@ -120,6 +120,13 @@ export async function POST(req: Request) {
         ? null
         : Number(hourMeter);
 
+    if (dailyRateNumber === null) {
+      return NextResponse.json(
+        { errors: { dailyRate: "Daily rate is required and must be a positive number" } },
+        { status: 400 }
+      );
+    }
+
     const normalized = {
       title: typeof title === "string" ? title : "",
       description: typeof description === "string" ? description : "",
@@ -136,13 +143,6 @@ export async function POST(req: Request) {
     const errors = validateEquipment(normalized);
     if (hasErrors(errors)) {
       return NextResponse.json(formatValidationErrors(errors), { status: 400 });
-    }
-
-    if (dailyRateNumber === null) {
-      return NextResponse.json(
-        { error: "Invalid daily rate" },
-        { status: 400 }
-      );
     }
 
     const equipment = await prisma.equipment.create({

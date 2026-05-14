@@ -4,8 +4,8 @@ import { useState, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { CardGallery, CardContact } from "@/components/cards/CardGallery";
-import { PeakButton } from "@/components/ui/PeakButton";
-import { PeakCard } from "@/components/ui/PeakCard";
+import { PeakButton } from "@/components/ui/peak-button";
+import { PeakCard } from "@/components/ui/peak-card";
 
 /**
  * My Network - Contact Cards Collection Page

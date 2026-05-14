@@ -129,7 +129,7 @@ export interface CreateConversationResponse {
 // CONTACT CARDS TYPES
 // ============================================================================
 
-export interface ContactCardSubject extends UserProfile {
+export interface ContactCardSubject extends UserProfileWithLocation {
   equipmentCount: number;
   equipmentPreview: EquipmentPreview[];
 }

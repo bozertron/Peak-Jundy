@@ -3,7 +3,8 @@
 import { useState, useMemo } from "react";
 import Image from "next/image";
 import { ContactCard } from "./ContactCard";
-import { PeakInput } from "../ui/PeakInput";
+import { PeakInput } from "../ui/peak-input";
+import type { ContactCardSubject } from "@/types/api";
 
 /**
  * CardGallery - A gallery view for contact cards collection
@@ -16,32 +17,16 @@ import { PeakInput } from "../ui/PeakInput";
  * - Sort options (newest, alphabetical)
  * - Total cards count display
  * - PEAK aesthetic with cream background
- *
- * @example
- * <CardGallery
- *   cards={collectedCards}
- *   isLoading={isLoading}
- *   emptyMessage="Start vouching to collect contact cards!"
- * />
  */
 
-// Card interface matching ContactCard expectations
+// A row in the gallery: a ContactCard row + the enriched subject the
+// card UI knows how to render.
 export interface CardContact {
   id: string;
   contactId: string;
   metAt?: Date | string | null;
   notes?: string | null;
-  contact: {
-    id: string;
-    name: string | null;
-    email: string;
-    avatarUrl?: string | null;
-    locationName?: string | null;
-    bio?: string | null;
-    flavor?: string | null;
-    foundingMember?: boolean;
-    memberSince?: Date | string;
-  };
+  contact: ContactCardSubject;
 }
 
 export interface CardGalleryProps {
@@ -166,7 +151,6 @@ export function CardGallery({
       result = result.filter(
         (c) =>
           c.contact.name?.toLowerCase().includes(query) ||
-          c.contact.email.toLowerCase().includes(query) ||
           c.contact.locationName?.toLowerCase().includes(query) ||
           c.contact.flavor?.toLowerCase().includes(query) ||
           c.notes?.toLowerCase().includes(query)
@@ -249,7 +233,7 @@ export function CardGallery({
             placeholder="Search cards..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            leftAddon={
+            icon={
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -345,8 +329,7 @@ export function CardGallery({
           {filteredCards.map((card) => (
             <ContactCard
               key={card.id}
-              contact={card}
-              onRemove={onRemove}
+              contact={card.contact}
             />
           ))}
         </div>

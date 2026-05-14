@@ -7,8 +7,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { ChatWindow, type Message, type Participant, type Equipment } from "@/components/chat/ChatWindow";
 import { ConversationList, type Conversation as ConversationListItem } from "@/components/chat/ConversationList";
-import { PeakButton } from "@/components/ui/PeakButton";
-import { PeakCard } from "@/components/ui/PeakCard";
+import { PeakButton } from "@/components/ui/peak-button";
+import { PeakCard } from "@/components/ui/peak-card";
 import {
   WebLinkClient,
   type ConnectionState,
@@ -25,6 +25,8 @@ interface ConversationData {
     id: string;
     name: string | null;
     avatarUrl: string | null;
+    flavor: string | null;
+    locationName: string | null;
   }>;
   equipment?: {
     id: string;
@@ -485,7 +487,7 @@ export default function ChatConversationPage() {
       id: p.id,
       name: p.name || "Unknown",
       avatarUrl: p.avatarUrl,
-      isOnline: false, // TODO: Implement online status
+      flavor: p.flavor ?? null,
     }));
 
   const primaryParticipant = otherParticipants[0];

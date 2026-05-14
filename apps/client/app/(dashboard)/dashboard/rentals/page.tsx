@@ -5,63 +5,122 @@ import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import { redirect } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
+const STATUS_STYLES: Record<string, { label: string; bg: string; color: string }> = {
+  PENDING: {
+    label: "Pending",
+    bg: "bg-peak-brass/15",
+    color: "text-peak-brass",
+  },
+  CONFIRMED: {
+    label: "Confirmed",
+    bg: "bg-peak-forest/15",
+    color: "text-peak-forest",
+  },
+  COMPLETED: {
+    label: "Completed",
+    bg: "bg-peak-navy/15",
+    color: "text-peak-navy",
+  },
+  CANCELLED: {
+    label: "Cancelled",
+    bg: "bg-peak-burgundy/15",
+    color: "text-peak-burgundy",
+  },
+};
+
+function fmt(d: Date) {
+  return d.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 export default async function RentalsPage() {
   const session = await getServerSession(authOptions);
-  if (!session) redirect("/auth/signin");
-  const renterId = session.user.id;
+  if (!session?.user?.id) redirect("/auth/signin");
 
   const bookings = await prisma.booking.findMany({
-    where: { renterId },
+    where: { renterId: session.user.id },
     orderBy: { createdAt: "desc" },
-    include: { equipment: true },
+    include: { equipment: { select: { id: true, title: true, image: true, category: true } } },
   });
 
   return (
     <div className="space-y-6">
-      <div className="bg-white border rounded-lg p-6">
-        <h1 className="text-2xl font-bold">My Rentals</h1>
-        <p className="text-sm text-gray-600 mt-1">
-          Your bookings and payment status.
+      <div className="peak-frame bg-white rounded-peak p-6">
+        <p className="font-mono uppercase tracking-[0.2em] text-xs text-peak-slate mb-2">
+          My rentals
         </p>
+        <h1 className="font-serif text-2xl font-bold text-peak-charcoal">
+          What you&rsquo;ve got out
+        </h1>
       </div>
 
-      <div className="bg-white border rounded-lg overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Equipment</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dates</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {bookings.map((b) => (
-              <tr key={b.id} className="hover:bg-gray-50">
-                <td className="px-6 py-3 text-sm">
-                  <Link className="text-blue-600 hover:underline" href={`/equipment/${b.equipmentId}`}>
-                    {b.equipment.title}
-                  </Link>
-                </td>
-                <td className="px-6 py-3 text-sm text-gray-700">
-                  {b.startDate.toDateString()} → {b.endDate.toDateString()}
-                </td>
-                <td className="px-6 py-3 text-sm text-gray-700">{formatCurrency(b.totalPrice)}</td>
-                <td className="px-6 py-3 text-sm">
-                  <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-700">{b.status}</span>
-                </td>
-              </tr>
-            ))}
-            {!bookings.length && (
-              <tr>
-                <td className="px-6 py-6 text-sm text-gray-600" colSpan={4}>
-                  No rentals yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      {bookings.length === 0 ? (
+        <div className="peak-frame bg-white rounded-peak p-10 text-center">
+          <div className="text-5xl mb-4" aria-hidden>
+            🪧
+          </div>
+          <h2 className="font-serif text-xl font-bold text-peak-charcoal mb-2">
+            Nothing rented yet.
+          </h2>
+          <p className="text-peak-charcoal/70 mb-5">
+            Find something on the catalog or the map and put it to work.
+          </p>
+          <Link
+            href="/browse"
+            className="inline-block px-5 py-2.5 rounded-peak bg-peak-forest text-white font-medium hover:bg-peak-forest/90 transition-colors"
+          >
+            Browse equipment
+          </Link>
+        </div>
+      ) : (
+        <div className="peak-frame bg-white rounded-peak overflow-hidden">
+          <ul className="divide-y divide-peak-charcoal/10">
+            {bookings.map((b) => {
+              const status = STATUS_STYLES[b.status] ?? STATUS_STYLES.PENDING!;
+              return (
+                <li key={b.id} className="p-5 flex flex-wrap items-center gap-4">
+                  <div className="flex-1 min-w-[200px]">
+                    <Link
+                      href={`/equipment/${b.equipmentId}`}
+                      className="font-serif text-lg font-bold text-peak-charcoal hover:text-peak-forest transition-colors"
+                    >
+                      {b.equipment.title}
+                    </Link>
+                    <p className="font-mono uppercase tracking-[0.15em] text-[10px] text-peak-slate mt-1">
+                      {b.equipment.category}
+                    </p>
+                    <p className="text-sm text-peak-charcoal/70 mt-1">
+                      {fmt(b.startDate)} → {fmt(b.endDate)}
+                    </p>
+                  </div>
+
+                  <div className="text-right">
+                    <p className="font-serif text-xl font-bold text-peak-forest">
+                      {formatCurrency(b.totalPrice)}
+                    </p>
+                    {b.cancellationReason && (
+                      <p className="text-xs text-peak-burgundy/70 mt-1">
+                        Cancelled: {b.cancellationReason.replace(/_/g, " ")}
+                      </p>
+                    )}
+                  </div>
+
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${status.bg} ${status.color}`}
+                  >
+                    {status.label}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

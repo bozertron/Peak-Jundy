@@ -44,7 +44,7 @@ export async function GET(
 
   return NextResponse.json({
     messages: items.reverse(), // Chronological order
-    nextCursor: hasMore ? items[0].id : null,
+    nextCursor: hasMore ? items[0]?.id ?? null : null,
     hasMore
   });
 }

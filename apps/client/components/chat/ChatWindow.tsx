@@ -12,7 +12,8 @@ interface Participant {
   id: string;
   name: string;
   avatarUrl?: string | null;
-  isOnline?: boolean;
+  /** Short self-description (mountain-town flair). Displayed under the name. */
+  flavor?: string | null;
 }
 
 interface Message {
@@ -201,11 +202,6 @@ export function ChatWindow({
                 </div>
               )}
 
-              {/* Online indicator */}
-              {primaryParticipant?.isOnline && (
-                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-green-500
-                                border-2 border-peak-snow" />
-              )}
             </div>
 
             {/* Participant Info */}
@@ -213,6 +209,13 @@ export function ChatWindow({
               <h3 className="font-serif text-lg text-peak-charcoal truncate">
                 {primaryParticipant?.name || "Unknown"}
               </h3>
+
+              {/* Flavor tagline — the mountain-town one-liner from their profile */}
+              {primaryParticipant?.flavor && (
+                <p className="text-sm text-peak-slate italic truncate">
+                  &ldquo;{primaryParticipant.flavor}&rdquo;
+                </p>
+              )}
 
               {otherParticipantsCount > 0 && (
                 <p className="text-sm text-peak-slate">
@@ -316,9 +319,10 @@ export function ChatWindow({
           <div className="space-y-3 peak-stagger">
             {messages.map((message, index) => {
               const isMine = currentUserId ? message.senderId === currentUserId : false;
-              const showDateSeparator = index === 0 || !isSameDay(
+              const prevMessage = messages[index - 1];
+              const showDateSeparator = index === 0 || !prevMessage || !isSameDay(
                 new Date(message.createdAt),
-                new Date(messages[index - 1].createdAt)
+                new Date(prevMessage.createdAt)
               );
 
               return (

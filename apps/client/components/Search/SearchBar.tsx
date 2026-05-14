@@ -1,22 +1,35 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { EQUIPMENT_CATEGORIES } from "@/lib/categories";
 
-export default function SearchBar() {
+interface Props {
+  initialQuery?: string;
+  initialCategory?: string;
+  size?: "lg" | "md";
+}
+
+export default function SearchBar({
+  initialQuery = "",
+  initialCategory = "",
+  size = "lg",
+}: Props) {
   const router = useRouter();
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("");
+  const searchParams = useSearchParams();
+  const [query, setQuery] = useState(initialQuery || searchParams.get("q") || "");
+  const [category, setCategory] = useState(
+    initialCategory || searchParams.get("category") || ""
+  );
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
   const suggestions = [
-    ...EQUIPMENT_CATEGORIES,
     "Telehandler 10k",
     "Boom lift 60ft",
     "Scissor lift electric",
     "Skid steer tracks",
-    "ICF bracing system",
+    "ICF bracing",
   ];
 
   const handleSearch = (e: React.FormEvent) => {
@@ -24,13 +37,8 @@ export default function SearchBar() {
     const trimmedQuery = query.trim();
     const trimmedCategory = category.trim();
 
-    if (!trimmedQuery) {
-      setError("Enter a search term.");
-      return;
-    }
-
     if (trimmedQuery.length > 100) {
-      setError("Search query must be 100 characters or fewer.");
+      setError("Whoa — search term too long. Keep it under 100 characters.");
       return;
     }
 
@@ -40,16 +48,19 @@ export default function SearchBar() {
 
     setError(null);
     startTransition(() => {
-      router.push(`/browse?${params.toString()}`);
+      router.push(params.toString() ? `/browse?${params.toString()}` : "/browse");
     });
   };
 
+  const inputBase =
+    size === "lg" ? "px-4 py-3 text-base" : "px-3 py-2 text-sm";
+
   return (
-    <form onSubmit={handleSearch} className="w-full max-w-2xl mx-auto">
-      <div className="flex flex-col md:flex-row gap-4">
+    <form onSubmit={handleSearch} className="w-full">
+      <div className="flex flex-col md:flex-row gap-2 md:gap-3">
         <input
           type="text"
-          placeholder="Search equipment (telehandler, boom lift...)"
+          placeholder="What are you looking for? (telehandler, boom lift, skid steer…)"
           value={query}
           list="equipment-search-suggestions"
           onChange={(e) => {
@@ -57,32 +68,43 @@ export default function SearchBar() {
             if (error) setError(null);
           }}
           aria-invalid={Boolean(error)}
-          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+          aria-label="Search equipment"
+          className={`flex-1 ${inputBase} font-sans rounded-peak bg-peak-snow border border-peak-stone text-peak-charcoal placeholder:text-peak-slate focus:outline-none focus:ring-2 focus:ring-peak-forest-500 focus:ring-offset-1 transition-all duration-200`}
         />
         <datalist id="equipment-search-suggestions">
-          {suggestions.map((suggestion) => (
-            <option key={suggestion} value={suggestion} />
+          {[...EQUIPMENT_CATEGORIES, ...suggestions].map((s) => (
+            <option key={s} value={s} />
           ))}
         </datalist>
 
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600"
+          aria-label="Filter by category"
+          className={`${inputBase} font-sans rounded-peak bg-peak-snow border border-peak-stone text-peak-charcoal focus:outline-none focus:ring-2 focus:ring-peak-forest-500 focus:ring-offset-1 transition-all duration-200`}
         >
-          <option value="">All Categories</option>
-          <option value="Telehandler">Telehandler</option>
-          <option value="Boom Lift">Boom Lift</option>
-          <option value="Skid Steer">Skid Steer</option>
-          <option value="ICF Bracing">ICF Bracing</option>
+          <option value="">All categories</option>
+          {EQUIPMENT_CATEGORIES.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
         </select>
 
-        <button type="submit" className="btn-primary" disabled={isPending}>
-          {isPending ? "Searching..." : "Search"}
+        <button
+          type="submit"
+          disabled={isPending}
+          className={`${inputBase} font-medium rounded-peak bg-peak-forest text-white hover:bg-peak-forest/90 disabled:opacity-50 transition-colors`}
+        >
+          {isPending ? "Searching…" : "Search"}
         </button>
       </div>
 
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {error && (
+        <p className="mt-2 text-sm text-peak-burgundy" role="alert">
+          {error}
+        </p>
+      )}
     </form>
   );
 }

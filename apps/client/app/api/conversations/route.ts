@@ -98,7 +98,9 @@ export async function GET(): Promise<NextResponse<ConversationListResponse | Err
           select: {
             id: true,
             name: true,
-            avatarUrl: true
+            avatarUrl: true,
+            flavor: true,
+            locationName: true
           }
         },
         equipment: {
@@ -286,7 +288,7 @@ export async function POST(
       },
       include: {
         participants: {
-          select: { id: true, name: true, avatarUrl: true }
+          select: { id: true, name: true, avatarUrl: true, flavor: true, locationName: true }
         },
         equipment: {
           select: { id: true, title: true, image: true, dailyRate: true }
@@ -322,7 +324,7 @@ export async function POST(
       },
       include: {
         participants: {
-          select: { id: true, name: true, avatarUrl: true }
+          select: { id: true, name: true, avatarUrl: true, flavor: true, locationName: true }
         },
         equipment: {
           select: { id: true, title: true, image: true, dailyRate: true }
