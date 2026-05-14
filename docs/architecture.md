@@ -213,17 +213,44 @@ Prior art also worth study: **Bridgefy** (BLE mesh SDK), **Berty** (libp2p + BLE
 
 ## 8. Maps
 
-- **MapLibre Native** — the C++/Rust native renderer (https://github.com/maplibre/maplibre-native), not the JS/WebGL variant. Native rendering performance, true offline support, mobile-friendly.
-- **Integration path** (under research): three plausible options being evaluated:
-  - **A.** MapLibre Native rendered in Rust → texture/image surface presented to the WebView.
-  - **B.** MapLibre Native in a separate Tauri-spawned native window/view alongside the WebView.
-  - **C.** `maplibre-rs` — pure-Rust WebGPU port. Less feature-complete but cleanest Tauri fit.
-  - The current research deliverable picks one with reasoning.
-- **Offline regions**: pre-downloaded by area. Storage budget per region settable per device. Format and cache-invalidation strategy follow the renderer choice.
-- **Tile sources** (under research): comparing **MapTiler** (commercial, generous free tier, clear offline licensing), **Stadia Maps** (commercial), and **self-hosted tileserver-gl** with OpenStreetMap data. Choice gates on cost-at-modest-scale + offline-region licensing terms.
-- **Map style**: custom Peak style — cream/snow palette, brass road accents, soft topographic shading, minimal labels. Authored in **Maputnik** (https://maputnik.github.io/) or MapTiler Studio. Stored at `packages/design-system/map-style.json`.
-- **Equipment pins**: emoji-based category icons over forest-green selected state; brass borders; subtle drop-shadow tail (pushpin aesthetic). Choice between MapLibre symbol layers vs HTML/Canvas overlay deferred to the integration path decision.
-- **Big White Village pre-bundled**: tiles for the founding-community region ship with the installer.
+Decisions locked in based on the MapLibre Native research deliverable. Caveat: `maplibre-rs` (the pure-Rust WebGPU port) was **archived January 2026** and is off the table. The active Rust binding is `maplibre-native-rs` (CXX over the C++ engine), v0.4.5, monthly auto-updates.
+
+### Renderer
+- **MapLibre Native** — C++17/20 GPU-accelerated vector tile renderer, BSD-2 licensed. (https://github.com/maplibre/maplibre-native)
+- Backends: OpenGL/OpenGL ES (Linux + Android primary), Vulkan and WebGPU available.
+
+### Integration path: **Path C — native MapView under transparent WebView**
+- **Android**: custom Tauri plugin (`tauri-plugin-peak-map`) embeds `org.maplibre.android.maps.MapView` (org.maplibre.gl:android-sdk:13.x) in the activity's root `FrameLayout` *under* a transparent WebView. Plugin exposes `@Command` methods for `setCamera`, `setStyle`, `addPins(geojson)`, `downloadOfflineRegion(bbox, zoomRange)`. Adds ~5–7 MB per ABI; minSdk 24.
+- **Linux**: `maplibre-native-rs` Continuous mode rendered into a `GtkGLArea` sibling of Tauri's GTK4 webview. Wayland-native via EGL.
+- **Rejected**: Path A (GL JS in WebView — no first-class offline regions, worse mobile performance). Path B (texture readback to WebView — IPC bandwidth and pointer-event latency would be visibly bad for pinch/pan). Path D (`maplibre-rs` — archived).
+
+### Tiles: **Protomaps PMTiles**
+- Single-file format, MIT license, native MapLibre protocol support via `pmtiles://path/to/file.pmtiles`. (https://docs.protomaps.com/pmtiles/maplibre)
+- **Big White Village pre-bundled**: regional PMTiles file ships in the installer. Path: `assets/map/tiles/big-white-village.pmtiles`. ~50–200 MB.
+- Future on-demand region downloads: host PMTiles files on cheap object storage (R2/S3, ~$0.50/mo), MapLibre uses HTTP range requests.
+- Build pipeline: OSM PBF → `planetiler` or `tilemaker` → PMTiles, run weekly/monthly via CI. ~2 hours per refresh.
+- Avoids the MAU-license traps of MapTiler/Stadia for offline use.
+- Online fallback for zoomed-out exploration outside downloaded regions: MapTiler Cloud Free (100K req/mo) for prototyping.
+
+### Offline regions
+- Bundled-PMTiles approach handles v1 (one region: Big White Village).
+- v2: dynamic per-region downloads via MapLibre's `OfflineManager` API on Android. Note: `maplibre-native-rs` v0.4.5 does not yet expose `OfflineManager` — Linux desktop sticks with bundled or pre-baked PMTiles for now.
+
+### Style authoring
+- **Maputnik** (https://maputnik.github.io/) — open-source, BSD, browser-based, exports MapLibre Style Spec JSON.
+- Start from Protomaps "basemap" style → fork → adjust palette: cream `#F5EFE0` base, snow `#FAFAF7` highlights, brass road accents `#B8924A`, soft hillshade overlay.
+- Stored at `assets/map/style.json` in the monorepo root (referenced by both Linux and Android builds).
+- Sprites and glyphs under `assets/map/sprites/peak@1x.png` (+ `@2x`) and `assets/map/glyphs/`. Bundled via Tauri `bundle.resources` in `tauri.conf.json`.
+
+### Equipment pins
+- **HTML overlay markers** in the React layer (not MapLibre symbol layers).
+  - Reason: emoji-based icons + brass borders + selected-state forest-green ring + scale animations are trivial in CSS; symbol layers would require pre-rasterizing emoji to a sprite sheet (the OS emoji font can't render in MapLibre's symbol pipeline).
+  - HTML markers comfortable up to ~200 visible at 60fps.
+- Camera-change events stream from the native plugin → React projects GeoJSON points to screen coords.
+- Above ~500 visible pins → swap to MapLibre symbol layers with `cluster: true` GeoJSON source. Threshold tunable.
+
+### Trust-network filtering
+- Done in Rust before the GeoJSON ever reaches the renderer: filter `equipment` by `vouch_graph.contains(equipment.owner_id)`, emit only that subset as the marker source. Renderer stays dumb; trust logic centralized.
 
 ## 9. Payments
 

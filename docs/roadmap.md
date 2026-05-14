@@ -27,7 +27,9 @@ Captured and consolidated in `vision.md` / `architecture.md`. Worktree `peak_vis
 - [x] Decision: headline north-star demo is two laptops on Wi-Fi mesh, no internet, mutual vouch + chat.
 - [x] Three consolidated docs written.
 - [x] Aegis (https://github.com/Rootbay/Aegis) cloned to `_research/aegis/` and reviewed — see notes in `architecture.md` §7.
-- [ ] **Pending research**: rust-libp2p evaluation, MapLibre Native integration path. Decisions land in next iteration.
+- [x] rust-libp2p evaluated — production-grade for TCP/QUIC/WebSocket/mDNS/Relay; BLE and Wi-Fi Direct are out-of-scope for libp2p so we'd build those bridges ourselves anyway. Identity story (Ed25519/Noise/PeerId) is the strongest part. ~70% NAT hole-punch on cellular; mitigate with our own relay infra.
+- [x] MapLibre Native research delivered — Path C locked (native MapView under transparent WebView), tiles = Protomaps PMTiles, style authored in Maputnik. Architecture §8 has the details.
+- [ ] **Outstanding**: P2P-foundation spike (rust-libp2p direct vs iroh vs Aegis-as-curated-libp2p) — decision lands after the spike in Phase 0.5.a.
 
 ---
 
@@ -46,11 +48,20 @@ The Aegis review and the libp2p evaluation both came in clean but each adds nuan
 
 **Spike**: build a 2-peer Automerge sync over each, on Linux + Android via Tauri. Compare ergonomics, build time, APK size, time-to-first-connect on a real cellular network. **Deliverable**: one-page decision doc + recommendation.
 
-### 0.5.b — Map integration spike
-**Pending** — waiting on the MapLibre Native research agent to surface the candidate paths. Likely shape: pick one of (Path A: Rust render → WebView texture, Path B: side-by-side native window, Path C: pure-Rust `maplibre-rs` via WebGPU), prototype it on Linux with Big White Village tiles offline. Decision doc + smallest-scope prototype proves the offline + custom-style story.
+### 0.5.b — Map integration spike (decisions locked, build the prototype)
+The MapLibre Native research deliverable picked **Path C** (native MapView under transparent WebView). Concrete prototype scope (1.5–2 weeks):
 
-### 0.5.c — Tile-source decision
-Compare MapTiler vs Stadia vs self-hosted tileserver-gl on cost-at-modest-scale (~1000 MAU) and offline-region licensing terms. Decision doc.
+- [ ] Linux-only Tauri window opens directly to Big White Village (49.7231, -118.9367)
+- [ ] Loads `assets/map/tiles/big-white-village.pmtiles` via `pmtiles://` MapLibre protocol
+- [ ] Applies stub Peak-styled `assets/map/style.json` (cream/brass/snow palette, hand-tuned in Maputnik from Protomaps basemap)
+- [ ] Smooth pan/zoom at 60fps with **airplane mode on** (proves true offline)
+- [ ] 5 hard-coded HTML overlay markers from a static GeoJSON file
+- [ ] Acceptance: the three load-bearing claims confirmed in one shot — MapLibre Native runs in Tauri Rust process, custom style renders correctly, offline-from-PMTiles works zero-network
+
+### 0.5.c — Tile-source decision (locked)
+**Protomaps PMTiles**. MIT license, single-file format (perfect for the Big White Village pre-bundle requirement), MapLibre native protocol support. Avoids the MAU-license traps of MapTiler/Stadia for offline use. Build pipeline: OSM PBF → `planetiler` or `tilemaker` → PMTiles, weekly/monthly via CI.
+
+Online fallback (when zoomed-out exploration leaves the bundled region): MapTiler Cloud Free (100K req/mo) for prototyping; reassess at scale.
 
 ---
 
@@ -174,17 +185,20 @@ Goal: higher-bandwidth wilderness peer-to-peer on Linux and Android.
 
 ---
 
-## Phase 9 — Offline maps
+## Phase 9 — Maps full integration (Linux + Android)
 
-Goal: maps that work without bars.
+Goal: maps that work without bars, on both Linux and Android, with the full Peak aesthetic.
 
-- [ ] **Swap Mapbox → MapLibre GL JS** in the map components.
-- [ ] **Tile source decision**: MapTiler vs Stadia Maps vs self-hosted OSM. Decision doc.
-- [ ] **Offline region UI**: user picks an area; tiles download for that bounding box; storage budget enforced.
-- [ ] **Author Peak map style** — cream/snow palette, brass road accents, soft topo. Stored in `packages/design-system/map-style.json`.
-- [ ] **Big White Village pre-bundled**: the founding-community region is included in the install package.
+Builds on the Phase 0.5.b spike. By this point the Linux prototype proves the rendering + offline + style story; this phase productionizes it and adds Android.
 
-**Acceptance**: full map navigation with airplane mode on, no degraded UX in the seeded region.
+- [ ] **Linux**: ship the Phase 0.5.b prototype as the production map view inside the Vite app's `app/map` route (via `GtkGLArea` sibling under Tauri's GTK4 webview).
+- [ ] **Android**: write `tauri-plugin-peak-map` — Kotlin `@TauriPlugin` class that embeds `org.maplibre.android.maps.MapView` under a transparent WebView, exposes `setCamera`, `setStyle`, `addPins(geojson)`, `downloadOfflineRegion`.
+- [ ] **Full Peak map style**: finalize `assets/map/style.json` — cream/snow base, brass road accents, soft hillshade, minimal labels. Sprites at `assets/map/sprites/peak@1x.png` (+ `@2x`).
+- [ ] **Equipment-pin rendering**: HTML overlay markers in React, synced to camera-change events from the native plugin. Trust-graph filtered in Rust before reaching the renderer.
+- [ ] **Cluster rendering**: at >100 visible pins, swap to MapLibre symbol layers with `cluster: true` GeoJSON source.
+- [ ] **PMTiles build pipeline**: CI job that produces `big-white-village.pmtiles` weekly from OSM PBF via `planetiler`. Bundled via `tauri.conf.json` `bundle.resources`.
+
+**Acceptance**: full map navigation with airplane mode on, no degraded UX in the bundled region. Pinch/pan smooth at 60fps on a mid-range Android phone.
 
 ---
 
