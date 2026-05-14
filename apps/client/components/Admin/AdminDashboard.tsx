@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { SearchLogAggregate, UnfulfilledSearchesResponse } from "@/lib/types";
+import type {
+  SearchLogAggregate,
+  UnfulfilledSearchesResponse,
+} from "@/lib/types";
+
+const inputClass =
+  "w-full px-3 py-2 rounded-peak bg-peak-snow border border-peak-stone text-peak-charcoal placeholder:text-peak-slate focus:outline-none focus:ring-2 focus:ring-peak-forest-500 focus:ring-offset-1 transition-all text-sm";
 
 export default function AdminDashboard() {
   const [searchLogs, setSearchLogs] = useState<SearchLogAggregate[]>([]);
@@ -15,57 +21,89 @@ export default function AdminDashboard() {
   const [appliedFilters, setAppliedFilters] = useState(filters);
 
   useEffect(() => {
-    async function fetchLogs() {
+    let cancelled = false;
+    (async () => {
       setLoading(true);
       setError(null);
       try {
         const params = new URLSearchParams();
         params.set("days", appliedFilters.days);
-        if (appliedFilters.minCount) params.set("minCount", appliedFilters.minCount);
+        if (appliedFilters.minCount)
+          params.set("minCount", appliedFilters.minCount);
         if (appliedFilters.query) params.set("query", appliedFilters.query);
 
-        const res = await fetch(`/api/analytics/unfulfilled-searches?${params.toString()}`);
-        const data = (await res.json()) as UnfulfilledSearchesResponse | { error?: string };
+        const res = await fetch(
+          `/api/analytics/unfulfilled-searches?${params.toString()}`
+        );
+        const data = (await res.json()) as
+          | UnfulfilledSearchesResponse
+          | { error?: string };
         if (!res.ok) {
-          throw new Error("error" in data && data.error ? data.error : "Failed to fetch analytics");
+          throw new Error(
+            "error" in data && data.error ? data.error : "Failed to fetch analytics"
+          );
         }
-        if ("topSearches" in data) {
-          setSearchLogs(data.topSearches || []);
-        } else {
-          setSearchLogs([]);
+        if (!cancelled) {
+          if ("topSearches" in data) {
+            setSearchLogs(data.topSearches || []);
+          } else {
+            setSearchLogs([]);
+          }
         }
-      } catch (error) {
-        setError(error instanceof Error ? error.message : "Failed to load analytics");
-        console.error("Failed to load analytics:", error);
+      } catch (err) {
+        if (!cancelled) {
+          console.error("[admin-analytics]", err);
+          setError(
+            err instanceof Error ? err.message : "Couldn't load analytics."
+          );
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
-    }
-
-    fetchLogs();
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [appliedFilters]);
 
   const topChart = searchLogs.slice(0, 10);
-  const maxCount = topChart.reduce((max, item) => Math.max(max, item._count.query), 1);
+  const maxCount = topChart.reduce(
+    (max, item) => Math.max(max, item._count.query),
+    1
+  );
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Admin Analytics Dashboard</h1>
+    <div className="space-y-6">
+      <div className="peak-frame bg-white rounded-peak p-6">
+        <p className="font-mono uppercase tracking-[0.2em] text-xs text-peak-slate mb-2">
+          Admin · analytics
+        </p>
+        <h1 className="font-serif text-2xl font-bold text-peak-charcoal">
+          What people are searching for
+        </h1>
+        <p className="text-sm text-peak-charcoal/70 mt-2">
+          Unfulfilled searches are where demand outpaces supply. Tell owners.
+        </p>
+      </div>
 
       <form
-        className="bg-white border rounded-lg p-4 mb-6 flex flex-col gap-4"
+        className="peak-frame bg-white rounded-peak p-5 space-y-4"
         onSubmit={(e) => {
           e.preventDefault();
           setAppliedFilters(filters);
         }}
       >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <label className="text-sm font-medium">
-            Date Range
+          <label className="block">
+            <span className="font-mono uppercase tracking-[0.15em] text-[10px] text-peak-slate block mb-1.5">
+              Date range
+            </span>
             <select
-              className="input-field w-full mt-2"
+              className={inputClass}
               value={filters.days}
-              onChange={(e) => setFilters({ ...filters, days: e.target.value })}
+              onChange={(e) =>
+                setFilters({ ...filters, days: e.target.value })
+              }
             >
               <option value="7">Last 7 days</option>
               <option value="30">Last 30 days</option>
@@ -73,41 +111,53 @@ export default function AdminDashboard() {
             </select>
           </label>
 
-          <label className="text-sm font-medium">
-            Minimum Count
+          <label className="block">
+            <span className="font-mono uppercase tracking-[0.15em] text-[10px] text-peak-slate block mb-1.5">
+              Minimum count
+            </span>
             <input
-              className="input-field w-full mt-2"
+              className={inputClass}
               type="number"
               min="0"
               value={filters.minCount}
-              onChange={(e) => setFilters({ ...filters, minCount: e.target.value })}
+              onChange={(e) =>
+                setFilters({ ...filters, minCount: e.target.value })
+              }
               placeholder="0"
             />
           </label>
 
-          <label className="text-sm font-medium">
-            Query Filter
+          <label className="block">
+            <span className="font-mono uppercase tracking-[0.15em] text-[10px] text-peak-slate block mb-1.5">
+              Query filter
+            </span>
             <input
-              className="input-field w-full mt-2"
+              className={inputClass}
               value={filters.query}
-              onChange={(e) => setFilters({ ...filters, query: e.target.value })}
+              onChange={(e) =>
+                setFilters({ ...filters, query: e.target.value })
+              }
               placeholder="e.g. telehandler"
             />
           </label>
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="btn-primary" type="submit" disabled={loading}>
-            {loading ? "Applying..." : "Apply Filters"}
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-4 py-2 rounded-peak bg-peak-forest text-white text-sm font-medium hover:bg-peak-forest/90 disabled:opacity-50 transition-colors"
+          >
+            {loading ? "Applying…" : "Apply filters"}
           </button>
           <button
-            className="btn-secondary"
             type="button"
             onClick={() => {
               const reset = { days: "30", minCount: "0", query: "" };
               setFilters(reset);
               setAppliedFilters(reset);
             }}
+            className="px-4 py-2 rounded-peak border border-peak-charcoal/15 text-sm text-peak-charcoal hover:bg-peak-cream transition-colors"
           >
             Reset
           </button>
@@ -115,102 +165,71 @@ export default function AdminDashboard() {
       </form>
 
       {error && (
-        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 text-sm">
+        <div
+          className="rounded-peak bg-peak-burgundy/5 border border-peak-burgundy/30 text-peak-burgundy p-4 text-sm"
+          role="alert"
+        >
           {error}
         </div>
       )}
 
-      {loading ? (
-        <div>Loading analytics...</div>
-      ) : (
-        <div className="bg-white border rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Top Search Demand</h2>
-          {topChart.length ? (
-            <div className="space-y-3">
-              {topChart.map((item) => (
-                <div key={item.query} className="flex items-center gap-3">
-                  <div className="w-32 text-xs text-gray-600 truncate">{item.query}</div>
-                  <div className="flex-1 bg-gray-100 rounded">
+      <div className="peak-frame bg-white rounded-peak overflow-hidden">
+        <div className="px-5 py-4 border-b border-peak-charcoal/10">
+          <p className="font-mono uppercase tracking-[0.2em] text-xs text-peak-slate mb-1">
+            Top demand
+          </p>
+          <h2 className="font-serif text-lg font-bold text-peak-charcoal">
+            Most-searched terms in the window
+          </h2>
+        </div>
+
+        {loading ? (
+          <div className="p-6 text-sm text-peak-charcoal/60">
+            Loading the slope report…
+          </div>
+        ) : topChart.length === 0 ? (
+          <div className="p-6 text-sm text-peak-charcoal/60 text-center">
+            Quiet on the search front. No unfulfilled queries in this window.
+          </div>
+        ) : (
+          <div className="p-5 space-y-2.5">
+            {topChart.map((item) => {
+              const pct = (item._count.query / maxCount) * 100;
+              const priority =
+                item._count.query > 100
+                  ? { label: "high", color: "text-peak-burgundy", bg: "bg-peak-burgundy" }
+                  : item._count.query > 50
+                    ? { label: "medium", color: "text-peak-brass", bg: "bg-peak-brass" }
+                    : { label: "low", color: "text-peak-forest", bg: "bg-peak-forest" };
+              return (
+                <div
+                  key={item.query}
+                  className="flex items-center gap-3 text-sm"
+                >
+                  <div className="w-36 truncate text-peak-charcoal/80">
+                    {item.query}
+                  </div>
+                  <div className="flex-1 h-2 rounded-full bg-peak-stone/30 overflow-hidden">
                     <div
-                      className="h-2 rounded bg-blue-500"
-                      style={{ width: `${(item._count.query / maxCount) * 100}%` }}
+                      className={`h-full ${priority.bg} rounded-full`}
+                      style={{ width: `${pct}%` }}
                     />
                   </div>
-                  <div className="w-10 text-xs text-gray-500 text-right">
+                  <div className="w-12 text-right font-mono text-peak-charcoal/70">
                     {item._count.query}
                   </div>
+                  <div
+                    className={`w-16 text-right text-xs font-medium ${priority.color}`}
+                  >
+                    {priority.label}
+                  </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-gray-500">No data available for the selected filters.</p>
-          )}
-          <div className="mt-4 text-xs text-gray-500">
-            Priority thresholds: High &gt; 100, Medium &gt; 50, Low ≤ 50
+              );
+            })}
           </div>
-        </div>
-      )}
-
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <div className="px-6 py-4 border-b">
-          <h2 className="text-xl font-semibold">Top Unfulfilled Searches</h2>
-          <p className="text-gray-600 text-sm">
-            Equipment renters are searching for but not finding
-          </p>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Search Query
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Count
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Priority
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {searchLogs.map((log) => (
-                <tr key={log.query} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                    {log.query}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
-                    {log._count.query}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                        log._count.query > 100
-                          ? "bg-red-100 text-red-800"
-                          : log._count.query > 50
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-green-100 text-green-800"
-                      }`}
-                    >
-                      {log._count.query > 100
-                        ? "High"
-                        : log._count.query > 50
-                        ? "Medium"
-                        : "Low"}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-              {!searchLogs.length && (
-                <tr>
-                  <td className="px-6 py-6 text-sm text-gray-600" colSpan={3}>
-                    No unfulfilled searches yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        )}
+        <div className="px-5 py-3 border-t border-peak-charcoal/10 text-[11px] text-peak-charcoal/60">
+          Priority thresholds: high &gt; 100, medium &gt; 50, low ≤ 50.
         </div>
       </div>
     </div>

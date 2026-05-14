@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { getServerSession } from "next-auth/next";
 import Navbar from "@/components/Navigation/Navbar";
 import Footer from "@/components/Footer";
@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   },
   description: "Equipment rental, the way mountain communities already trust each other.",
   applicationName: "Peak",
+};
+
+export const viewport: Viewport = {
   themeColor: "#2D5A47",
 };
 

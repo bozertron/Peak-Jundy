@@ -33,7 +33,6 @@ export interface CardGalleryProps {
   cards: CardContact[];
   isLoading?: boolean;
   emptyMessage?: string;
-  onRemove?: (id: string) => void;
   className?: string;
 }
 
@@ -122,7 +121,6 @@ export function CardGallery({
   cards,
   isLoading = false,
   emptyMessage = "No contacts in your collection yet. Start vouching to collect contact cards!",
-  onRemove,
   className = "",
 }: CardGalleryProps) {
   const [searchQuery, setSearchQuery] = useState("");

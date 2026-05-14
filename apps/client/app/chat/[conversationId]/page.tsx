@@ -325,6 +325,7 @@ export default function ChatConversationPage() {
       console.error("Failed to initialize WebLink, falling back to polling:", err);
       startPolling();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUserId, conversationId]);
 
   /**

@@ -67,22 +67,8 @@ export default function CardsPage() {
     return { totalCards, foundingMembers, uniqueLocations, uniqueFlavors };
   }, [cards]);
 
-  // Handle card removal
-  const handleRemoveCard = async (cardId: string) => {
-    try {
-      const response = await fetch(`/api/cards/${cardId}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to remove card");
-      }
-
-      setCards((prev) => prev.filter((c) => c.id !== cardId));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to remove card");
-    }
-  };
+  // Contact cards are a record of who you've met on Peak. They're not
+  // something you "delete" — the trust graph just breathes on its own.
 
   // Unauthenticated state
   if (status === "unauthenticated") {
@@ -337,8 +323,7 @@ export default function CardsPage() {
         <CardGallery
           cards={cards}
           isLoading={isLoading}
-          emptyMessage="Your network is waiting to grow! Start by vouching for people you know and trust to begin building your contact card collection."
-          onRemove={handleRemoveCard}
+          emptyMessage="Your binder is empty. Vouch for someone — that's how cards land."
           className="shadow-peak-frame"
         />
 

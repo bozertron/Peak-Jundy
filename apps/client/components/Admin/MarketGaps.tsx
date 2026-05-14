@@ -46,43 +46,58 @@ export default function MarketGaps() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function load() {
+    let cancelled = false;
+    (async () => {
       setLoading(true);
       setError(null);
       try {
         const res = await fetch(`/api/analytics/market-gaps?days=${days}`);
-        const data = (await res.json()) as MarketGapsResponse | { error?: string };
+        const data = (await res.json()) as
+          | MarketGapsResponse
+          | { error?: string };
         if (!res.ok) {
-          throw new Error("error" in data && data.error ? data.error : "Failed to load market gaps");
+          throw new Error(
+            "error" in data && data.error ? data.error : "Couldn't load market gaps."
+          );
         }
-        if ("gaps" in data) {
-          setGaps(data.gaps ?? []);
-        } else {
-          setGaps([]);
+        if (!cancelled) {
+          if ("gaps" in data) setGaps(data.gaps ?? []);
+          else setGaps([]);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load market gaps");
+        if (!cancelled) {
+          console.error("[market-gaps]", err);
+          setError(
+            err instanceof Error ? err.message : "Couldn't load market gaps."
+          );
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
-    }
-
-    load();
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [days]);
 
   const recommendations = useMemo(() => buildRecommendations(gaps), [gaps]);
 
   return (
-    <div className="max-w-6xl mx-auto bg-white border rounded-lg p-6 space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className="peak-frame bg-white rounded-peak p-6 space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold">Market Gap Analysis</h2>
-          <p className="text-sm text-gray-600">Top unmet demand over the selected window.</p>
+          <p className="font-mono uppercase tracking-[0.2em] text-xs text-peak-slate mb-1">
+            Market gaps
+          </p>
+          <h2 className="font-serif text-lg font-bold text-peak-charcoal">
+            What people wanted but couldn&rsquo;t find
+          </h2>
         </div>
         <select
-          className="input-field"
+          className="px-3 py-2 rounded-peak bg-peak-snow border border-peak-stone text-peak-charcoal text-sm focus:outline-none focus:ring-2 focus:ring-peak-forest-500"
           value={days}
           onChange={(e) => setDays(e.target.value)}
+          aria-label="Window"
         >
           <option value="7">Last 7 days</option>
           <option value="30">Last 30 days</option>
@@ -91,41 +106,57 @@ export default function MarketGaps() {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm">
+        <div
+          className="rounded-peak bg-peak-burgundy/5 border border-peak-burgundy/30 text-peak-burgundy p-3 text-sm"
+          role="alert"
+        >
           {error}
         </div>
       )}
 
       {loading ? (
-        <p className="text-sm text-gray-600">Loading market gaps...</p>
+        <p className="text-sm text-peak-charcoal/60">
+          Reading the snow report…
+        </p>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-gray-50 border rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">Top Queries</h3>
-            <ul className="space-y-2 text-sm text-gray-700">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="rounded-peak border border-peak-charcoal/10 bg-peak-cream/30 p-4">
+            <p className="font-mono uppercase tracking-[0.15em] text-[10px] text-peak-slate mb-3">
+              Top queries
+            </p>
+            <ul className="space-y-2 text-sm text-peak-charcoal/80">
               {gaps.slice(0, 8).map((gap) => (
                 <li key={gap.query} className="flex items-center justify-between">
                   <span className="truncate">{gap.query}</span>
-                  <span className="text-xs text-gray-500">{gap._count.query}</span>
+                  <span className="text-xs text-peak-charcoal/50 font-mono">
+                    {gap._count.query}
+                  </span>
                 </li>
               ))}
-              {!gaps.length && <li className="text-gray-500">No gaps reported.</li>}
+              {!gaps.length && (
+                <li className="text-peak-charcoal/50">
+                  Nothing to report this window. Either everyone&rsquo;s
+                  finding what they need or no one&rsquo;s looking yet.
+                </li>
+              )}
             </ul>
           </div>
 
-          <div className="bg-gray-50 border rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">
-              Recommended Listings
-            </h3>
-            <ul className="space-y-2 text-sm text-gray-700">
+          <div className="rounded-peak border border-peak-charcoal/10 bg-peak-cream/30 p-4">
+            <p className="font-mono uppercase tracking-[0.15em] text-[10px] text-peak-slate mb-3">
+              Recommend to owners
+            </p>
+            <ul className="space-y-2 text-sm text-peak-charcoal/80">
               {recommendations.map((rec) => (
                 <li key={rec.label} className="flex items-center justify-between">
                   <span className="truncate">{rec.label}</span>
-                  <span className="text-xs text-gray-500">{rec.count}</span>
+                  <span className="text-xs text-peak-charcoal/50 font-mono">
+                    {rec.count}
+                  </span>
                 </li>
               ))}
               {!recommendations.length && (
-                <li className="text-gray-500">No recommendations yet.</li>
+                <li className="text-peak-charcoal/50">No suggestions yet.</li>
               )}
             </ul>
           </div>
