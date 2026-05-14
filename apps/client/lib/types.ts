@@ -1,5 +1,5 @@
 /**
- * TypeScript interfaces for Peak Rentals
+ * TypeScript interfaces for Peak
  * Provides strict typing for all data models
  */
 

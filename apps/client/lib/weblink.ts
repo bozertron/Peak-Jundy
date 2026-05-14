@@ -1,5 +1,5 @@
 /**
- * WebLink - Peer-to-Peer Communications System for Peak Rentals
+ * WebLink - Peer-to-Peer Communications System for Peak
  *
  * Like a well-maintained mountain radio network, WebLink ensures clear communication
  * between members of the Peak community. Built with the same care we'd give to
@@ -49,7 +49,7 @@ export type MessageStatus =
 export type MessagePriority = "low" | "normal" | "high" | "urgent";
 
 /**
- * The fundamental unit of communication in Peak Rentals.
+ * The fundamental unit of communication in Peak.
  * Each message is like a note passed between neighbors -
  * personal, traceable, and reliably delivered.
  */
@@ -644,7 +644,7 @@ export class WebLinkClient {
       read: false,
       status: "pending",
       priority: options.priority ?? "normal",
-      metadata: options.metadata,
+      ...(options.metadata ? { metadata: options.metadata } : {}),
     };
 
     // Register delivery callback if provided
@@ -954,7 +954,7 @@ export class WebLinkClient {
     const error = new Error(message) as WebLinkError;
     error.code = code;
     error.recoverable = recoverable;
-    error.context = context;
+    if (context !== undefined) error.context = context;
     return error;
   }
 

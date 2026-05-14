@@ -59,7 +59,7 @@ export const PeakInput = forwardRef<HTMLInputElement, PeakInputProps>(
               // Error state
               hasError && "border-peak-burgundy focus:ring-peak-burgundy/30 focus:border-peak-burgundy",
               // Icon padding
-              icon && "pl-10",
+              icon ? "pl-10" : null,
               // Disabled state
               "disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-peak-stone/30",
               className

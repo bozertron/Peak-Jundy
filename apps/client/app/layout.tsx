@@ -7,8 +7,13 @@ import Providers from "@/components/Providers";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
-  title: "Peak Rentals - Equipment Rental Marketplace",
-  description: "Peer-to-peer heavy equipment rental platform",
+  title: {
+    default: "Peak",
+    template: "%s · Peak",
+  },
+  description: "Equipment rental, the way mountain communities already trust each other.",
+  applicationName: "Peak",
+  themeColor: "#2D5A47",
 };
 
 export default async function RootLayout({

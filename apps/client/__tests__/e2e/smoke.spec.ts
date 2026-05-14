@@ -10,7 +10,7 @@ test.describe('Smoke Tests', () => {
     await page.goto('/');
 
     // Should load without errors
-    await expect(page).toHaveTitle(/Peak Rentals/i);
+    await expect(page).toHaveTitle(/Peak/i);
   });
 
   test('browse page is accessible', async ({ page }) => {

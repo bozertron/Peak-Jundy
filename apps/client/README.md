@@ -1,6 +1,6 @@
-# Peak Rentals (Alpha)
+# Peak — web client
 
-A peer-to-peer heavy equipment rental marketplace (Next.js 14 + TypeScript + Tailwind + Prisma + NextAuth + Stripe Connect).
+The web app at the heart of Peak. See the repo-root `docs/` for vision, architecture, and roadmap. This package is the Next.js 14 + TypeScript + Tailwind + Prisma + NextAuth + Stripe Connect client that ships v0 as a responsive website.
 
 ## Quick start
 

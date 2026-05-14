@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Peak Rentals E2E Test Configuration
+ * Peak E2E Test Configuration
  * Run with: npm run test:e2e
  */
 export default defineConfig({

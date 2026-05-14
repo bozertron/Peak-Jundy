@@ -60,10 +60,10 @@ export function EquipmentPopup({ equipment, position, onClose }: EquipmentPopupP
       <div className="w-72 bg-white rounded-peak shadow-peak overflow-hidden peak-frame">
         {/* Equipment Image */}
         <div className="relative h-36 bg-peak-cream">
-          {equipment.imageUrl ? (
+          {equipment.image ? (
             <Image
-              src={equipment.imageUrl}
-              alt={equipment.name}
+              src={equipment.image}
+              alt={equipment.title}
               fill
               className="object-cover"
             />
@@ -92,7 +92,7 @@ export function EquipmentPopup({ equipment, position, onClose }: EquipmentPopupP
 
           {/* Title */}
           <h3 className="font-serif text-lg font-bold text-peak-charcoal mb-1 line-clamp-1">
-            {equipment.name}
+            {equipment.title}
           </h3>
 
           {/* Description */}
@@ -103,7 +103,7 @@ export function EquipmentPopup({ equipment, position, onClose }: EquipmentPopupP
           {/* Price */}
           <div className="flex items-baseline gap-1 mb-3">
             <span className="text-xl font-bold text-peak-forest">
-              ${equipment.pricePerDay}
+              ${(equipment.dailyRate / 100).toFixed(0)}
             </span>
             <span className="text-sm text-peak-charcoal/60">/day</span>
           </div>
@@ -143,13 +143,14 @@ export function EquipmentPopup({ equipment, position, onClose }: EquipmentPopupP
             >
               View Details
             </Link>
-            <MessageOwnerButton
-              ownerId={equipment.owner.id}
-              ownerName={equipment.owner.name || "Owner"}
-              equipmentId={equipment.id}
-              equipmentName={equipment.name}
-              className="flex-1 px-4 py-2 bg-peak-cream text-peak-charcoal text-center text-sm font-medium rounded-lg hover:bg-peak-cream/80 transition-colors"
-            />
+            <div className="flex-1">
+              <MessageOwnerButton
+                ownerId={equipment.owner.id}
+                ownerName={equipment.owner.name || "Owner"}
+                equipmentId={equipment.id}
+                equipmentTitle={equipment.title}
+              />
+            </div>
           </div>
         </div>
       </div>

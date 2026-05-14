@@ -1,7 +1,6 @@
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 
-const STRIPE_API_VERSION = "2024-06-20";
 const PLATFORM_FEE_BPS = Number(process.env.PLATFORM_FEE_BPS || 1000); // 10%
 
 let stripeClient: Stripe | null = null;
@@ -13,7 +12,9 @@ function getStripeClient() {
   }
 
   if (!stripeClient) {
-    stripeClient = new Stripe(apiKey, { apiVersion: STRIPE_API_VERSION });
+    // Use account's pinned API version (per Stripe dashboard).
+    // Avoids type drift when SDK is upgraded.
+    stripeClient = new Stripe(apiKey);
   }
 
   return stripeClient;

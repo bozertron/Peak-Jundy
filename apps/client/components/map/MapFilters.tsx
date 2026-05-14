@@ -77,8 +77,8 @@ export function MapFilters({ filters, onFilterChange }: MapFiltersProps) {
             >
               <option value="">All Categories</option>
               {EQUIPMENT_CATEGORIES.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.emoji} {cat.name}
+                <option key={cat} value={cat}>
+                  {cat}
                 </option>
               ))}
             </select>

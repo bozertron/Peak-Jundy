@@ -1,4 +1,4 @@
-# Peak Rentals - Agent Guidelines
+# Peak - Agent Guidelines
 
 ## Commands
 - `npm run dev` - Start development server

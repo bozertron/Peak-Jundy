@@ -7,7 +7,7 @@ const emailServerHost = process.env.EMAIL_SERVER_HOST ?? "localhost";
 const emailServerPort = Number(process.env.EMAIL_SERVER_PORT || 587);
 const emailServerUser = process.env.EMAIL_SERVER_USER ?? "";
 const emailServerPassword = process.env.EMAIL_SERVER_PASSWORD ?? "";
-const emailFrom = process.env.EMAIL_FROM ?? "Peak Rentals <noreply@peakrentals.local>";
+const emailFrom = process.env.EMAIL_FROM ?? "Peak <noreply@peak.local>";
 const authSecret = process.env.NEXTAUTH_SECRET;
 
 export const authOptions: NextAuthOptions = {

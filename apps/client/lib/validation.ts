@@ -1,5 +1,5 @@
 /**
- * Input validation utilities for Peak Rentals
+ * Input validation utilities for Peak
  * Validates equipment, bookings, and search inputs
  */
 

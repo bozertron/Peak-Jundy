@@ -1,4 +1,4 @@
-# Peak Rentals Development Roadmap
+# Peak Development Roadmap
 
 ## Current Status: Sprint 2 Complete
 
@@ -174,7 +174,7 @@ peaksBalance    Int       @default(0)
 
 ### Quick Start
 ```bash
-cd "Peak Rentals Application/Peak Rentals Project"
+cd "Peak Application/Peak Project"
 npm install
 cp .env.example .env
 # Edit .env with your credentials

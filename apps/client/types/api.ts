@@ -1,4 +1,4 @@
-// API Response Types for Peak Rentals
+// API Response Types for Peak
 // Provides type safety for all API endpoints
 
 // ============================================================================

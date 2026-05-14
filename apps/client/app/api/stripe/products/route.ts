@@ -4,7 +4,7 @@
  * POST /api/stripe/products
  *
  * Creates a Stripe Product that represents an item available for purchase.
- * In Peak Rentals, products represent equipment that can be rented.
+ * In Peak, products represent equipment that can be rented.
  *
  * Request body:
  * {

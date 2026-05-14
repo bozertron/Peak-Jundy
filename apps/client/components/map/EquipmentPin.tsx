@@ -261,7 +261,7 @@ export function EquipmentPin({
   );
 
   // Get the appropriate icon component
-  const IconComponent = icons[config.icon] || icons.package;
+  const IconComponent = (icons[config.icon] ?? icons.package)!;
 
   // Get price for display (support both naming conventions)
   const price = equipment.dailyRate ?? equipment.pricePerDay;

@@ -25,7 +25,7 @@ export default function Sidebar({ userRole }: { userRole: string }) {
 
   return (
     <aside className="w-64 border-r bg-white p-4 flex flex-col">
-      <div className="font-extrabold text-gray-900 mb-6">Peak Rentals</div>
+      <div className="font-extrabold text-gray-900 mb-6">Peak</div>
 
       <div className="space-y-1">
         <NavItem href="/dashboard" label="Dashboard" />

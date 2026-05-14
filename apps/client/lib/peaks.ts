@@ -1,8 +1,8 @@
 /**
- * Peak Rentals - Peaks Rewards System
+ * Peak - Peaks Rewards System
  * "Sophisticated Ski Chalet" - A distinguished rewards currency for the discerning community
  *
- * Peaks are the currency of trust and engagement within Peak Rentals. Much like
+ * Peaks are the currency of trust and engagement within Peak. Much like
  * the summit markers on a mountain trail, they represent milestones of meaningful
  * participation. This is not gamification for its own sake - it is recognition
  * of the bonds forged between community members.
@@ -405,7 +405,7 @@ export function getTierDisplay(tier: PeaksMemberTier): {
     },
     'Alpine Elite': {
       color: '#722F37',  // Burgundy - the summit achieved
-      description: 'At the pinnacle of Peak Rentals',
+      description: 'At the pinnacle of Peak',
     },
   };
 

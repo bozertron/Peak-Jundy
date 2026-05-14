@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import mapboxgl from "mapbox-gl";
+import type { FeatureCollection } from "geojson";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 // Set access token from environment
@@ -102,13 +103,13 @@ const CATEGORY_ICONS: Record<string, string> = {
  */
 function getCategoryEmoji(category: string): string {
   const key = category.toLowerCase().replace(/\s+/g, "-");
-  return CATEGORY_ICONS[key] || CATEGORY_ICONS.default;
+  return CATEGORY_ICONS[key] ?? CATEGORY_ICONS.default ?? "";
 }
 
 /**
  * Convert equipment array to GeoJSON FeatureCollection for clustering
  */
-function equipmentToGeoJSON(equipment: MapEquipment[]): GeoJSON.FeatureCollection {
+function equipmentToGeoJSON(equipment: MapEquipment[]): FeatureCollection {
   return {
     type: "FeatureCollection",
     features: equipment
@@ -326,17 +327,17 @@ export function PeakMap({
     // ============================================================================
 
     // Click on cluster -> zoom in
-    map.on("click", clusterId, (e) => {
+    map.on("click", clusterId, (e: mapboxgl.MapMouseEvent) => {
       const features = map.queryRenderedFeatures(e.point, { layers: [clusterId] });
-      if (!features.length) return;
+      if (!features.length || !features[0]) return;
 
       const clusterId2 = features[0].properties?.cluster_id;
       const source = map.getSource(sourceId) as mapboxgl.GeoJSONSource;
 
       source.getClusterExpansionZoom(clusterId2, (err, zoom) => {
         if (err) return;
-        const geometry = features[0].geometry;
-        if (geometry.type === "Point") {
+        const geometry = features[0]?.geometry;
+        if (geometry && geometry.type === "Point") {
           map.easeTo({
             center: geometry.coordinates as [number, number],
             zoom: zoom ?? 14,
@@ -347,9 +348,9 @@ export function PeakMap({
     });
 
     // Click on individual pin -> show popup & callback
-    map.on("click", unclusteredId, (e) => {
+    map.on("click", unclusteredId, (e: mapboxgl.MapMouseEvent) => {
       const features = map.queryRenderedFeatures(e.point, { layers: [unclusteredId] });
-      if (!features.length) return;
+      if (!features.length || !features[0]) return;
 
       const feature = features[0];
       const props = feature.properties;
@@ -418,10 +419,10 @@ export function PeakMap({
     });
 
     // Individual pin hover
-    map.on("mouseenter", unclusteredId, (e) => {
+    map.on("mouseenter", unclusteredId, (e: mapboxgl.MapMouseEvent) => {
       map.getCanvas().style.cursor = "pointer";
       const features = map.queryRenderedFeatures(e.point, { layers: [unclusteredId] });
-      if (features.length) {
+      if (features.length && features[0]) {
         setHoveredPinId(features[0].properties?.id || null);
         map.setPaintProperty(unclusteredId, "circle-stroke-color", PEAK_COLORS.forest);
         map.setPaintProperty(unclusteredId, "circle-radius", 22);
