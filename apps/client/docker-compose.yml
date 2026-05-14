@@ -1,0 +1,31 @@
+# Local Postgres for Peak development.
+# Alternative to Neon — use whichever you prefer.
+#
+#   docker compose up -d        # start Postgres
+#   docker compose down         # stop
+#   docker compose down -v      # stop AND wipe data
+#
+# Connection string for .env.local:
+#   DATABASE_URL="postgres://peak:peak@localhost:5432/peak?schema=public"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: peak-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: peak
+      POSTGRES_PASSWORD: peak
+      POSTGRES_DB: peak
+    ports:
+      - "5432:5432"
+    volumes:
+      - peak_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U peak -d peak"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  peak_pgdata:

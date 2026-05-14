@@ -1,29 +1,41 @@
 # Peak — web client
 
-The web app at the heart of Peak. See the repo-root `docs/` for vision, architecture, and roadmap. This package is the Next.js 14 + TypeScript + Tailwind + Prisma + NextAuth + Stripe Connect client that ships v0 as a responsive website.
+The web app at the heart of Peak. See the repo-root `docs/` for vision, architecture, roadmap, and deployment guide. This package is the Next.js 14 + TypeScript + Tailwind + Prisma + NextAuth + Stripe Connect client that ships v0 as a responsive website.
 
-## Quick start
+## Quick start (local dev)
 
-1) Install deps
-```bash
-npm install
-```
+1. **Install deps**
+   ```bash
+   npm install
+   ```
 
-2) Create `.env.local` (copy from `.env.example`)
-```bash
-cp .env.example .env.local
-```
+2. **Set up Postgres.** Pick one:
+   - **Local Docker** (no signup):
+     ```bash
+     docker compose up -d
+     ```
+   - **Neon** (https://neon.tech, free tier): create a project, copy the pooled connection string.
 
-3) Initialize DB
-```bash
-npx prisma migrate dev --name init
-npx prisma generate
-```
+3. **Configure env**
+   ```bash
+   cp .env.example .env.local
+   # Then edit .env.local — set DATABASE_URL, NEXTAUTH_SECRET, etc.
+   ```
+   Minimum to boot the app: `DATABASE_URL`, `NEXTAUTH_SECRET`. Stripe/email/Mapbox can stay placeholder until you exercise those flows.
 
-4) Run
-```bash
-npm run dev
-```
+4. **Sync the schema and seed**
+   ```bash
+   npx prisma db push        # schema -> DB (no migration history)
+   npm run db:seed           # users, equipment, vouches, conversations, chests
+   ```
+
+5. **Run**
+   ```bash
+   npm run dev
+   ```
+   Open http://localhost:3000
+
+For production deploys, see `../../docs/deploy.md`.
 
 ## Stripe setup notes
 
