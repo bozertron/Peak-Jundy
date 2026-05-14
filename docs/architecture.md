@@ -8,17 +8,23 @@
 
 | Layer | Choice | Notes |
 |---|---|---|
-| Client shell | **Tauri 2.0** | One codebase → macOS, Windows, Linux, iOS, Android. WebView-based; ~5–10× less memory/battery than Electron. |
+| Client shell | **Tauri 2.0** | One codebase → Linux + Android in v1; iOS/macOS/Windows deferred. WebView-based; ~5–10× less memory/battery than Electron. |
 | Frontend framework | **Vite + React + TanStack Router** | Type-safe routing, fast HMR, native fit for Tauri's static-file model. No SSR (not applicable). |
 | Native side | **Rust** (Tauri commands + plugins) | SQLite, BLE, Wi-Fi, CRDT engine, filesystem, secure storage. |
 | Local storage | **SQLite** via `tauri-plugin-sql` | Single source of truth on-device. |
 | ORM (client) | **Drizzle** | Works in Tauri's runtime (Prisma doesn't). Same schema everywhere. |
 | Sync model | **Local-first with CRDTs** | Automerge for concurrent data (messages, conversations). Last-write-wins for user-owned scalars. |
 | Identity | **Ed25519 keypair**, generated on first run | Stored in OS keychain via `tauri-plugin-stronghold`. |
-| Transports | **Internet · Wi-Fi mesh · BLE · LoRa (future)** | Transport-agnostic message envelope; same signed payload over any channel. |
-| Maps | **MapLibre GL** + offline regions | Open-source Mapbox fork. Aggressive tile caching. |
+| P2P / mesh | **rust-libp2p** OR **Aegis** (under evaluation) — see `_research/aegis/` and pending research | Final choice gated on the agent reviews now in flight. |
+| Transports | **Internet · Wi-Fi mesh · BLE** in v1; **LoRa via companion hardware** deferred | Transport-agnostic message envelope; same signed payload over any channel. |
+| Maps | **MapLibre Native** + offline regions | Native renderer (not GL JS). Integration path TBD by current research; `maplibre-rs` (pure Rust, WebGPU) also under evaluation. |
 | Payments | **Stripe Connect** (destination charges) | Online-only operation; queued and replayed when reachable. |
 | Server (v2+) | None in v1. Eventually a slim **Hono** or **Rust/Axum** relay. | Pure local + mesh in v1 forces correctness; cloud added as optimization. |
+
+### Platform scope for v1
+- **Primary**: Linux desktop (Fedora 43, Wayland) and Android.
+- **Deferred**: iOS (no Multipeer Connectivity work in v1), macOS, Windows.
+- **Demo target**: two Fedora laptops on the same Wi-Fi network, no internet, mutual vouch + chat over the mesh.
 
 ## 2. Local-first principles
 
@@ -174,28 +180,50 @@ All sync flows peer-to-peer through the mesh transport layer. Peers discovered o
 
 ## 7. Mesh transport layer
 
-Single abstraction (`packages/mesh-protocol`) over four transports. Each implements a common interface: `discover()`, `connect()`, `send()`, `receive()`, `disconnect()`.
+Single abstraction (`packages/mesh-protocol`) over the transports below. Each implements a common interface: `discover()`, `connect()`, `send()`, `receive()`, `disconnect()`.
 
-| Transport | Range | Bandwidth | Power | Native | Use |
+### v1 transports (Linux + Android)
+
+| Transport | Range | Bandwidth | Power | Where | Use |
 |---|---|---|---|---|---|
-| Internet (WebSocket/HTTPS) | global | high | medium | yes | Default when reachable; long-distance sync |
-| Wi-Fi Direct (Android) | 200m+ | high | medium | Android | Full sync between nearby peers |
-| Multipeer Connectivity (iOS) | 200m+ | high | medium | iOS | Apple's Wi-Fi/BLE hybrid framework |
-| Wi-Fi Aware (NAN) | ~100m | mid | low-medium | both, newer | Infrastructure-free discovery + messaging |
+| Internet (TCP/QUIC/WebSocket) | global | high | medium | both | Default when reachable; long-distance sync |
+| Wi-Fi Direct | 200m+ | high | medium | Android | Full sync between nearby peers without infrastructure |
+| Wi-Fi ad-hoc / AP mode | 200m+ | high | medium | Linux | Linux equivalent for the wilderness laptop demo |
+| mDNS local discovery | local LAN | n/a | low | both | Find Peak peers on the same Wi-Fi network |
 | BLE (custom GATT profile) | 10–100m | low | very low | both | Proximity discovery, low-bandwidth status pings |
-| LoRa (companion hardware) | 2–15km | very low | very low | hardware add-on | **Emergency beacon, life-saving** |
 
-**Cross-platform abstraction**: leading candidate is **libp2p** (Rust crate `rust-libp2p`) with BLE/Wi-Fi/TCP transports. Fallback: custom Rust integration of `btleplug` (BLE) + platform-specific Wi-Fi adapters.
+### Deferred (post-v1)
 
-Prior art to study: **Bridgefy** (BLE mesh SDK), **Berty** (libp2p + BLE chat), **Briar** (Tor + BT + Wi-Fi mesh), **Meshtastic** (LoRa). See `roadmap.md` Phase 5–6 for research scope.
+| Transport | Status |
+|---|---|
+| Multipeer Connectivity (iOS) | iOS deferred — not in v1 |
+| Wi-Fi Aware (NAN) | Worth re-evaluation when Android coverage is solid |
+| LoRa (companion hardware) | Deferred — phone-native transports cover v1 wilderness story |
+
+### Foundation choice (under evaluation)
+
+Two candidates being researched in parallel:
+
+1. **rust-libp2p** — mature P2P stack in Rust. Modular transports (TCP, QUIC, WebSocket, mDNS, Noise). BLE and Wi-Fi mesh likely require custom integration. Sized for production.
+2. **Aegis** (https://github.com/Rootbay/Aegis) — already a Tauri app with Rust P2P layer. Cloned to `_research/aegis/` for review. May give us a head start; tradeoff is alignment with our specific transport mix and the licensing terms.
+
+The decision lands in the next iteration once both research deliverables are in. Whichever wins, the `mesh-protocol` package wraps it so we can swap underneath without touching application code.
+
+Prior art also worth study: **Bridgefy** (BLE mesh SDK), **Berty** (libp2p + BLE chat), **Briar** (Tor + BT + Wi-Fi mesh), **Meshtastic** (LoRa). See `roadmap.md` Phase 5–6 for research scope.
 
 ## 8. Maps
 
-- **MapLibre GL JS** in the WebView (open-source Mapbox GL fork; no token required for non-Mapbox tiles).
-- **Offline regions**: pre-downloaded by area. Storage budget per region settable per device.
-- **Tile sources**: starting with **MapTiler** or **Stadia Maps** (commercial, has offline-friendly licensing), with **OpenStreetMap** as the data layer.
-- **Map style**: custom Peak style — cream/snow palette, brass road accents, soft topographic shading, minimal labels. Authored in MapTiler Studio or Maputnik.
-- **Equipment pins**: emoji-based category icons over forest-green selected state; brass borders; subtle drop-shadow tail (pushpin aesthetic).
+- **MapLibre Native** — the C++/Rust native renderer (https://github.com/maplibre/maplibre-native), not the JS/WebGL variant. Native rendering performance, true offline support, mobile-friendly.
+- **Integration path** (under research): three plausible options being evaluated:
+  - **A.** MapLibre Native rendered in Rust → texture/image surface presented to the WebView.
+  - **B.** MapLibre Native in a separate Tauri-spawned native window/view alongside the WebView.
+  - **C.** `maplibre-rs` — pure-Rust WebGPU port. Less feature-complete but cleanest Tauri fit.
+  - The current research deliverable picks one with reasoning.
+- **Offline regions**: pre-downloaded by area. Storage budget per region settable per device. Format and cache-invalidation strategy follow the renderer choice.
+- **Tile sources** (under research): comparing **MapTiler** (commercial, generous free tier, clear offline licensing), **Stadia Maps** (commercial), and **self-hosted tileserver-gl** with OpenStreetMap data. Choice gates on cost-at-modest-scale + offline-region licensing terms.
+- **Map style**: custom Peak style — cream/snow palette, brass road accents, soft topographic shading, minimal labels. Authored in **Maputnik** (https://maputnik.github.io/) or MapTiler Studio. Stored at `packages/design-system/map-style.json`.
+- **Equipment pins**: emoji-based category icons over forest-green selected state; brass borders; subtle drop-shadow tail (pushpin aesthetic). Choice between MapLibre symbol layers vs HTML/Canvas overlay deferred to the integration path decision.
+- **Big White Village pre-bundled**: tiles for the founding-community region ship with the installer.
 
 ## 9. Payments
 
@@ -276,13 +304,19 @@ Animation: 150 ms fast / 250 ms standard / 400 ms slow. Easing: `ease` curves on
 
 To resolve during execution (tracked in `roadmap.md`):
 
-1. **libp2p vs custom mesh stack.** libp2p gives a lot for free but is heavy. Worth measuring binary size and battery impact before committing.
-2. **iOS BLE background limitations.** iOS restricts background BLE advertising. How aggressively can we discover peers when the app is backgrounded?
-3. **Wi-Fi Direct on iOS.** iOS doesn't expose Wi-Fi Direct directly. Multipeer Connectivity is the official path — does it give us what we need, or do we need ad-hoc Wi-Fi via captive portal hacks?
+1. **rust-libp2p vs Aegis vs build-our-own.** Currently being researched. Choice impacts binary size, transport coverage, and how much foundational code we own.
+2. **MapLibre Native integration path.** Three options under evaluation (Path A/B/C/D in §8). Choice impacts Tauri integration complexity and Android performance.
+3. **Tile-source vendor.** MapTiler vs Stadia vs self-hosted. Cost and offline licensing decide.
 4. **CRDT footprint.** Automerge documents grow over time. Pruning/snapshotting strategy needed before message history gets large.
-5. **Map tile licensing offline.** MapTiler offline licensing terms; alternative is self-hosted OSM tiles, which costs us infrastructure. Decision deferred to Phase 7.
-6. **Stripe vs payment alternatives in remote regions.** Stripe requires internet at point of sale. Should v2+ support cash/IOU bookings with reconciliation when online?
-7. **Voucher acceptance.** Does broadcasting require vouchee acceptance, or is it unilateral?
-8. **Vouch decay.** Do old vouches expire? After how long?
-9. **Beacon-mode protocol.** What does "I'm here, send help" look like over BLE / Wi-Fi / LoRa? Standard format? Bridge to emergency services?
-10. **Multi-device sync.** When a user has laptop + phone, how does identity-pairing work? What if they lose a device — recovery flow?
+5. **Stripe vs payment alternatives in remote regions.** Stripe requires internet at point of sale. Should v2+ support cash/IOU bookings with reconciliation when online?
+6. **Voucher acceptance.** Does broadcasting require vouchee acceptance, or is it unilateral?
+7. **Vouch decay.** Do old vouches expire? After how long?
+8. **Beacon-mode protocol.** What does "I'm here, send help" look like over BLE / Wi-Fi? Standard format? Bridge to emergency services?
+9. **Multi-device sync.** When a user has laptop + phone, how does identity-pairing work? What if they lose a device — recovery flow?
+10. **Linux Wi-Fi mesh approach.** Wi-Fi Direct support in Linux is uneven; AP-mode + mDNS may be the practical path for the two-laptop demo. Spike needed.
+
+### Deferred (intentionally not v1)
+
+- **iOS support.** All Multipeer Connectivity / AWDL / iOS-keychain work is out of scope.
+- **macOS / Windows desktop.** Linux desktop only.
+- **LoRa companion hardware.** Phone-native transports cover v1.

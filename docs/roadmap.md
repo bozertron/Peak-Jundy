@@ -22,7 +22,35 @@ Captured and consolidated in `vision.md` / `architecture.md`. Worktree `peak_vis
 - [x] Decision: Tauri 2.0 + Vite + React + TanStack Router.
 - [x] Decision: local + mesh only for v1, no cloud server.
 - [x] Decision: kebab-case naming convention.
+- [x] Decision: Linux (Fedora 43) + Android only for v1; iOS / macOS / Windows / LoRa deferred.
+- [x] Decision: rip the band-aid — go to Vite + Tauri immediately after schema, don't waste effort on the dying Next.js scaffolding.
+- [x] Decision: headline north-star demo is two laptops on Wi-Fi mesh, no internet, mutual vouch + chat.
 - [x] Three consolidated docs written.
+- [x] Aegis (https://github.com/Rootbay/Aegis) cloned to `_research/aegis/` and reviewed — see notes in `architecture.md` §7.
+- [ ] **Pending research**: rust-libp2p evaluation, MapLibre Native integration path. Decisions land in next iteration.
+
+---
+
+## Phase 0.5 — Pre-execution research spikes
+
+Two decisions need short prototypes before we lock the architecture in code. Each spike is timeboxed (1–2 days).
+
+### 0.5.a — P2P foundation spike
+The Aegis review and the libp2p evaluation both came in clean but each adds nuance. Three credible paths:
+
+| Option | Get for free | Risk |
+|---|---|---|
+| **rust-libp2p direct** | Mature TCP/QUIC/WebSocket/mDNS/Relay, Ed25519+Noise, broad ecosystem, multi-language interop | ~70% NAT hole-punch success on cellular; we still build BLE/Wi-Fi-Direct ourselves |
+| **iroh** | ~90% direct-connect, official Android/iOS support, QUIC-multipath, smaller surface | Younger (pre-1.0), tighter opinions, leans on n0 hosted relays by default |
+| **Aegis** (already uses libp2p v0.40 + adds Ed25519 / Noise / Vodozemac E2EE / AERP routing) | Crypto + identity + mesh routing already built in a Tauri+Rust app | Discord-like data model we don't want; BLE/Wi-Fi Direct stubbed; v0.1.0 maturity |
+
+**Spike**: build a 2-peer Automerge sync over each, on Linux + Android via Tauri. Compare ergonomics, build time, APK size, time-to-first-connect on a real cellular network. **Deliverable**: one-page decision doc + recommendation.
+
+### 0.5.b — Map integration spike
+**Pending** — waiting on the MapLibre Native research agent to surface the candidate paths. Likely shape: pick one of (Path A: Rust render → WebView texture, Path B: side-by-side native window, Path C: pure-Rust `maplibre-rs` via WebGPU), prototype it on Linux with Big White Village tiles offline. Decision doc + smallest-scope prototype proves the offline + custom-style story.
+
+### 0.5.c — Tile-source decision
+Compare MapTiler vs Stadia vs self-hosted tileserver-gl on cost-at-modest-scale (~1000 MAU) and offline-region licensing terms. Decision doc.
 
 ---
 
@@ -87,17 +115,17 @@ Goal: leave Next.js behind; land on the architecture from `architecture.md` §3.
 
 ---
 
-## Phase 5 — Tauri shell, desktop builds
+## Phase 5 — Tauri shell, Linux desktop build
 
-Goal: wrap the client in Tauri for native macOS/Windows/Linux.
+Goal: wrap the client in Tauri for Linux (Fedora 43, Wayland). Other desktop platforms deferred.
 
 - [ ] **Scaffold `apps/client/src-tauri/`** with `tauri init` against the Vite app.
 - [ ] **Wire up `tauri-plugin-sql`** for the local SQLite. Replace any Node-fs-based local storage.
-- [ ] **Wire up `tauri-plugin-stronghold`** for keychain-backed Ed25519 keypair.
+- [ ] **Wire up `tauri-plugin-stronghold`** for keychain-backed Ed25519 keypair (or libsecret on GNOME if Stronghold is too heavy).
 - [ ] **Identity bootstrap**: on first launch, generate keypair, store in keychain, write public key to local DB.
-- [ ] **Build matrix**: produce signed builds for macOS (arm64 + x86_64), Windows (x86_64), Linux (x86_64). CI optional in this phase.
+- [ ] **Linux build**: produce a Fedora 43–compatible binary (AppImage and/or RPM). Test on the dev workstation.
 
-**Acceptance**: install Peak.dmg/MSI/AppImage; first-launch flow generates identity; app boots offline and shows local-seeded equipment.
+**Acceptance**: install on Fedora 43; first-launch flow generates identity; app boots offline and shows local-seeded equipment.
 
 ---
 
@@ -118,29 +146,31 @@ Goal: the meat of local-first. Outbound queue, CRDT-backed message sync, signed 
 
 ## Phase 7 — BLE mesh prototype (research → spike → ship)
 
-Goal: phone-to-phone discovery and low-bandwidth messaging over Bluetooth.
+Goal: device-to-device discovery and low-bandwidth messaging over Bluetooth, on Linux + Android.
 
-- [ ] **Research deliverable**: one-page decision doc on libp2p vs custom GATT profile. Cover binary-size impact, iOS background limitations, Android API maturity.
-- [ ] **Spike**: Rust crate `btleplug` from `src-tauri`; basic peer discovery + GATT read/write between two devices.
-- [ ] **Integrate into mesh transport layer**: BLE becomes one of the registered transports. Message envelope unchanged.
-- [ ] **iOS background behavior**: confirm we can advertise + scan in background within Apple's limits.
-- [ ] **Demo target**: two phones with no network, in BLE range, can ping presence and exchange a 100-byte vouch.
+- [ ] **Research deliverable** (partly done): decision doc on libp2p custom transport vs raw `btleplug` integration. From the libp2p evaluation: BLE is not a libp2p first-class transport — we'll build the BLE transport ourselves on `btleplug`, then hand the resulting socket-like channel to libp2p.
+- [ ] **Spike**: `btleplug` from `src-tauri`; basic peer discovery + GATT read/write between two devices (Linux↔Linux first, then Linux↔Android).
+- [ ] **Android foreground service**: required for sustained BLE advertising on Android 12+. Implement persistent notification + service lifecycle.
+- [ ] **Multi-hop relay**: Aegis review noted BLE in upstream is point-to-point only. We extend with relay forwarding so peers act as repeaters.
+- [ ] **Integrate into mesh transport layer**: BLE becomes a registered transport. Message envelope unchanged.
+- [ ] **Demo target**: two devices with no network, in BLE range, can ping presence and exchange a 100-byte vouch.
 
-**Acceptance**: phone-to-phone presence ping works at < 30 m. Battery draw < 5%/hour with BLE scanning active.
+**Acceptance**: device-to-device presence ping works at < 30 m. Battery draw < 5%/hour with BLE scanning active.
 
 ---
 
 ## Phase 8 — Wi-Fi mesh prototype (research → spike → ship)
 
-Goal: higher-bandwidth wilderness peer-to-peer.
+Goal: higher-bandwidth wilderness peer-to-peer on Linux and Android.
 
-- [ ] **Research deliverable**: decision doc on Wi-Fi Direct (Android) + Multipeer Connectivity (iOS) vs Wi-Fi Aware (NAN). Cover platform parity, range testing, battery impact.
-- [ ] **Android spike**: Wi-Fi Direct peer discovery + connection from Tauri.
-- [ ] **iOS spike**: Multipeer Connectivity bridge — likely needs custom Swift code accessible via Tauri.
+- [ ] **Research deliverable**: decision doc on Wi-Fi Direct (Android) vs Linux ad-hoc/AP-mode + mDNS. Cover OEM Android quirks (Samsung/Xiaomi diverge on Wi-Fi Direct service discovery), group-formation latency (5–15s typical), and battery impact.
+- [ ] **Linux spike**: ad-hoc / AP mode Wi-Fi via `nmcli` or `hostapd`, with mDNS for peer discovery. Two laptops, no infrastructure.
+- [ ] **Android spike**: Wi-Fi Direct via `WifiP2pManager` from Tauri (JNI bridge). Once L2 link is up, libp2p TCP/QUIC takes over.
+- [ ] **Pair with BLE**: BLE handles the "saw a nearby peer" event; Wi-Fi takes over for the actual data link (Wi-Fi Direct discovery is too slow on its own).
 - [ ] **Integrate into mesh transport layer**.
 - [ ] **Range test**: confirm 200m+ line-of-sight in open environment.
 
-**Acceptance**: two phones, no infrastructure, 200m apart in line-of-sight, can fully sync trust graph + recent messages.
+**Acceptance**: two devices, no infrastructure, 200m apart in line-of-sight, can fully sync trust graph + recent messages. **This is the headline demo (Demo C in execution plan).**
 
 ---
 
@@ -158,17 +188,18 @@ Goal: maps that work without bars.
 
 ---
 
-## Phase 10 — Mobile builds
+## Phase 10 — Android build
 
-Goal: iOS + Android shipping.
+Goal: Android shipping. iOS remains deferred.
 
-- [ ] **`tauri ios init` + `tauri android init`** scaffolding.
-- [ ] **Mobile-specific UI passes**: touch targets, gesture handling, safe areas.
-- [ ] **Mobile-specific transports**: confirm BLE and Wi-Fi mesh work end-to-end on both platforms.
-- [ ] **App Store / Play Store metadata**, icons, privacy disclosures.
-- [ ] **TestFlight / Internal Track** beta.
+- [ ] **`tauri android init`** scaffolding via `cargo-mobile2`. NDK r28+ for the 16 KB page-size requirement Google Play now enforces.
+- [ ] **Mobile UI pass**: touch targets, gesture handling, safe areas, navigation patterns.
+- [ ] **APK size budget**: target < 30 MB per ABI; use `--split-per-abi` (libp2p alone is ~6–10 MB).
+- [ ] **Confirm transports end-to-end**: BLE foreground service, Wi-Fi Direct group formation, internet QUIC.
+- [ ] **Play Store metadata**, icons, privacy disclosures.
+- [ ] **Internal Track** beta.
 
-**Acceptance**: signed builds in both stores, internal beta with at least 10 testers.
+**Acceptance**: signed APK on Play Internal Track; internal beta with at least 10 testers using BLE/Wi-Fi mesh in real-world conditions.
 
 ---
 
@@ -176,9 +207,9 @@ Goal: iOS + Android shipping.
 
 Goal: deliberate, life-saving feature. Skiers, climbers, trail crews can rely on it.
 
-- [ ] **Protocol spec**: what does "I need help" look like over BLE, Wi-Fi, future LoRa? Standardize the payload (location, identity, severity, free-text).
+- [ ] **Protocol spec**: what does "I need help" look like over BLE and Wi-Fi? Standardize the payload (location, identity, severity, free-text). LoRa version comes later (Phase 12+, post-v1).
 - [ ] **Power-aware UX**: low-screen-brightness mode; minimal CPU; maximize beacon-radio duty cycle.
-- [ ] **Relay rules**: any Peak device in range opportunistically relays beacons toward internet-connected peers.
+- [ ] **Relay rules**: any Peak device in range opportunistically relays beacons toward internet-connected peers, regardless of vouch graph (life safety overrides trust gating).
 - [ ] **Bridge to emergency services**: research feasibility of forwarding beacons to local SAR (Search & Rescue) APIs or text-911 in supported regions.
 - [ ] **False-positive guardrails**: confirmation flow, automatic clear, no accidental activation.
 
@@ -186,9 +217,9 @@ Goal: deliberate, life-saving feature. Skiers, climbers, trail crews can rely on
 
 ---
 
-## Phase 12 — LoRa companion hardware research
+## Phase 12 — LoRa companion hardware research (post-v1)
 
-Goal: extend mesh range to kilometers. Future-facing.
+Goal: extend mesh range to kilometers. **Explicitly post-v1** — phone-native transports cover the v1 wilderness story. Don't start until v1 ships.
 
 - [ ] **Survey landscape**: Meshtastic ecosystem (LILYGO T-Beam, RAK, etc.), goTenna Mesh, Beartooth (defunct, lessons learned).
 - [ ] **Protocol compatibility**: can Peak speak Meshtastic protocol natively, or do we ship a custom bridge?

@@ -21,8 +21,14 @@ This is the differentiator. Everything else flows from it.
 - **Local-first by default.** All user data lives on-device first. The server (when one exists) is a sync relay, not a source of truth.
 - **Multi-modal communication.** Internet when available, Wi-Fi mesh in line-of-sight wilderness, Bluetooth for proximity, eventually LoRa for true long-range.
 - **Signed messages, no central auth.** Identity is a local Ed25519 keypair. Signatures travel with every message, through every transport. The relay server cannot impersonate.
-- **Offline maps.** Mapbox/MapLibre offline regions, cached aggressively. You can navigate, browse equipment, send messages, and queue vouches without bars.
+- **Offline maps.** MapLibre Native offline regions, cached aggressively. You can navigate, browse equipment, send messages, and queue vouches without bars.
 - **Life-saving potential.** "I'm here, send help" is a deliberate design target. Beacon mode with low-power transports is on the roadmap. We design knowing skiers, climbers, and trail crews will sometimes rely on this in real emergencies.
+
+### Platform scope for v1
+
+- **Primary targets**: Linux desktop (Fedora 43, Wayland, GNOME 49) and Android.
+- **Deferred**: iOS, macOS, Windows. The wilderness principle and mesh transports are tested on the platforms where we actually develop and ship; other platforms come once Linux + Android are battle-hardened.
+- **LoRa companion hardware**: deferred. Phone-native BLE + Wi-Fi cover the v1 wilderness story.
 
 ## 3. Mission
 

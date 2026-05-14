@@ -1,7 +1,24 @@
-/Peak Rentals Application.zip
+# Local research material (cloned external repos, scratch notes)
+_research/
 
-# Wasteland - obsolete/archived files for historical reference
-_wasteland/
+# Build artifacts
+node_modules/
+dist/
+build/
+.next/
+.turbo/
+target/
+*.tsbuildinfo
 
-# OGREF - Original reference files (keep in git but ignore for context)
-# OGREF/
+# Env
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
